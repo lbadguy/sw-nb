@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SW-NB 15 Pro Max - 巅峰之作</title>
+    <!-- 引入 Vanilla Tilt 用于 3D 悬浮特效 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 开机画面 -->
+    <div id="loader">
+        <div class="glitch-loader" data-text="SYSTEM OVERRIDE">BOOTING SW-NB OS 15...</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+    </div>
+
+    <!-- 背景粒子特效 (Canvas) -->
+    <canvas id="particles-js"></canvas>
+
+    <nav>
+        <div class="logo">SW-NB.</div>
+        <a href="javascript:void(0)" class="buy-btn" onclick="alert('警告！由于配置过于逆天，已被全银河系禁售！')">立即抢购 (不可用)</a>
+    </nav>
+
+    <div class="content">
+        <!-- Hero Section -->
+        <section id="hero" style="position: relative;">
+            <div class="float-text" style="top: 5%;">FLAGSHIP</div>
+            <div class="reveal">
+                <h1 style="filter: drop-shadow(0 0 40px rgba(255,0,127,0.6));">SW-NB 15 Pro Max</h1>
+                <div class="massive-text">跨越物种的史诗级震撼。</div>
+                <p class="desc">搭载人类史上首枚量产的「沙雕」神经元仿生芯片。极致的身材，逆天的品味，这不是一台简单的设备，这是你的下半辈子。</p>
+            </div>
+            
+            <div class="reveal glass-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.5" style="transition-delay: 0.2s;">
+                <div class="hologram-effect"></div>
+                <span style="transform: translateZ(60px); filter: drop-shadow(0 0 30px rgba(255,255,255,1)); font-size: clamp(6rem, 20vw, 10rem);">😎</span>
+            </div>
+        </section>
+
+        <!-- AF System -->
+        <section id="camera">
+            <div class="reveal" style="width: 100%;">
+                <h2 class="massive-text" style="background: var(--accent-2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">雷达级 AI 智能对焦美腿</h2>
+                <p class="desc">直接粉碎物理法则的微距追踪。覆盖方圆 500 米范围，一旦截获哪怕 1 像素的美腿信号，视网膜马达即刻在 <strong style="color: #00f2fe;">0.001 秒</strong> 内完成暴力变焦。<strong style="color: #fff;">咬死目标，永不脱靶。</strong></p>
+                
+                <div class="radar-container">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-center"></div>
+                    <div class="radar-target t1"></div>
+                    <div class="radar-target t2"></div>
+                    <div class="radar-target t3"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Design -->
+        <section id="design">
+            <div class="reveal">
+                <h2 class="massive-text" style="background: var(--accent-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">人品正直，下面长直</h2>
+                <p class="desc">史无前例的航空级钛金属锻造工艺。不屈的灵魂，不弯的肉体。无论你从什么角度去挑剔，他永远是一根<strong style="color: #f7ce68;">坚不可摧、笔直向上的擎天柱。</strong></p>
+                
+                <div class="straight-pole-container">
+                    <div class="straight-pole"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Battery -->
+        <section id="battery" style="overflow-x: hidden;">
+            <div class="float-text" style="top: 30%; left: -30%; font-size: 20vw; opacity: 0.04; color: red;">DANGER</div>
+            <div class="reveal">
+                <h2 class="massive-text" style="color: #38f9d7; text-shadow: 0 0 40px rgba(56,249,215,0.6);">爆发力惊天地泣鬼神，但续航...</h2>
+                <h1 style="font-size: clamp(5rem, 15vw, 12rem); background: #ff0000; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 80px rgba(255,0,0,0.8); margin: 30px 0;">3 小时</h1>
+                <p class="desc">物理规则的代价。超维度的力量输出意味着恐怖的能耗。充电 <strong style="color: #fff;">12</strong> 小时，仅换来 <strong style="color: #ff4444;">3</strong> 小时的极致体验。<br>⚠️ <strong style="color: #ff0000;">电池亮红灯时，请立即寻找掩体倒数并撤离现场！</strong></p>
+                
+                <div class="battery-core">
+                    <div class="battery-juice"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Storage -->
+        <section id="storage" style="padding: 0;">
+            <div class="blackhole-container">
+                <div class="blackhole"></div>
+                <div class="blackhole-text reveal">
+                    <h2>2TB MAX</h2>
+                    <div class="massive-text" style="margin-top: -10px; font-size: clamp(1.5rem, 5vw, 3.5rem);">吞噬宇宙的记忆黑洞</div>
+                    <p class="desc" style="max-width: 700px; margin: 30px auto 0 auto; color: #ccc; padding: 0 20px;">空间大到足以扭曲时间。<strong style="color: #ff007f;">1.9TB 存放无底线的骚话与段子</strong>，极度压缩的 <strong style="color: #00f2fe;">0.1TB 处理正经事</strong>。读取速度 100GB/s，你甚至还未开口，他已准备好接梗。</p>
+                </div>
+            </div>
+        </section>
+
+        <footer style="padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); background: #000; position: relative; z-index: 10;">
+            <p style="color: rgba(255,255,255,0.4); font-size: 1rem; font-weight: 700; letter-spacing: 2px;">SW-NB INC. 2026</p>
+            <p style="color: rgba(255,255,255,0.2); font-size: 0.8rem; margin-top: 15px; max-width: 80vw; margin-inline: auto;">* 郑重警告：产品页面使用了大量高能特技。由此引发的视网膜剥离、括约肌失控等物理伤害，本公司概不负责。</p>
+        </footer>
+    </div>
+
+    <!-- 逻辑脚本 -->
+    <script src="script.js"></script>
+</body>
+</html>
