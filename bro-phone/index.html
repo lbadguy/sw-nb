@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SW-NB 15 Pro Max - 巅峰之作</title>
     <!-- 引入 Vanilla Tilt 用于 3D 悬浮特效 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='8' y='50' font-size='48'%3E%F0%9F%98%8E%3C/text%3E%3C/svg%3E">
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js" onload="window.initTilt && window.initTilt()"></script>
+    <link rel="stylesheet" href="style.css?v=20260321b">
 </head>
 <body>
 
@@ -21,7 +22,7 @@
 
     <nav>
         <div class="logo">SW-NB.</div>
-        <a href="javascript:void(0)" class="buy-btn" onclick="alert('警告！由于配置过于逆天，已被全银河系禁售！')">立即抢购 (不可用)</a>
+        <a href="#versions" class="buy-btn">查看版本与价格</a>
     </nav>
 
     <div class="content">
@@ -94,13 +95,148 @@
             </div>
         </section>
 
-        <footer style="padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); background: #000; position: relative; z-index: 10;">
-            <p style="color: rgba(255,255,255,0.4); font-size: 1rem; font-weight: 700; letter-spacing: 2px;">SW-NB INC. 2026</p>
-            <p style="color: rgba(255,255,255,0.2); font-size: 0.8rem; margin-top: 15px; max-width: 80vw; margin-inline: auto;">* 郑重警告：产品页面使用了大量高能特技。由此引发的视网膜剥离、括约肌失控等物理伤害，本公司概不负责。</p>
+        <!-- Chip / Performance -->
+        <section id="chip" class="launch-section chip-section">
+            <div class="launch-copy reveal">
+                <p class="section-kicker">CORE ARCHITECTURE</p>
+                <h2 class="launch-title">神经元级场面控制引擎</h2>
+                <p class="launch-desc">把反应链路、气氛调度和接话速度，统一交给一枚过于超前的性能核心。</p>
+            </div>
+
+            <div class="chip-stage reveal">
+                <div class="chip-visual">
+                    <div class="chip-core">
+                        <span>SW-Core X</span>
+                    </div>
+                    <div class="chip-line chip-line-h"></div>
+                    <div class="chip-line chip-line-v"></div>
+                    <div class="chip-node n1"></div>
+                    <div class="chip-node n2"></div>
+                    <div class="chip-node n3"></div>
+                    <div class="chip-node n4"></div>
+                </div>
+                <div class="chip-stats">
+                    <div class="mega-stat">
+                        <span>响应链路</span>
+                        <strong>0.01s</strong>
+                    </div>
+                    <div class="spec-pills">
+                        <article>神经元级调度</article>
+                        <article>多线程接梗</article>
+                        <article>全时场面控制</article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scenes -->
+        <section id="scenes" class="launch-section scenes-section">
+            <div class="launch-copy reveal">
+                <p class="section-kicker">SIGNATURE SCENES</p>
+                <h2 class="launch-title">典型场景，逐一接管</h2>
+                <p class="launch-desc">不解释原理，直接看它在不同场合里怎么接手整场氛围。</p>
+            </div>
+
+            <div class="scene-grid">
+                <article class="scene-card reveal">
+                    <div class="scene-visual scene-night"></div>
+                    <p class="scene-label">Night Mode</p>
+                    <h3>夜场模式</h3>
+                    <p>灯光再乱，重心依旧稳稳落在主角身上。</p>
+                </article>
+                <article class="scene-card reveal">
+                    <div class="scene-visual scene-group"></div>
+                    <p class="scene-label">Group Capture</p>
+                    <h3>合影模式</h3>
+                    <p>人再多，站位再乱，也能自动把存在感拉满。</p>
+                </article>
+                <article class="scene-card reveal">
+                    <div class="scene-visual scene-chat"></div>
+                    <p class="scene-label">Instant Banter</p>
+                    <h3>群聊接梗模式</h3>
+                    <p>消息还没刷完，下一句已经在路上。</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Versions -->
+        <section id="versions" class="launch-section versions-section">
+            <div class="launch-copy reveal">
+                <p class="section-kicker">VERSIONS & PRICING</p>
+                <h2 class="launch-title">三个版本，一眼选定</h2>
+                <p class="launch-desc">从轻量亮相到完整版压轴，配置拉开，气场同步升级。</p>
+            </div>
+
+            <div class="versions-grid">
+                <article class="version-card reveal">
+                    <p class="version-name">SW-NB 15 Air</p>
+                    <p class="version-storage">256GB</p>
+                    <p class="version-role">适合轻量出场，主打一个清爽利落。</p>
+                    <p class="version-price">¥6,999</p>
+                    <a href="#faq" class="version-cta">查看说明</a>
+                </article>
+
+                <article class="version-card reveal">
+                    <p class="version-name">SW-NB 15 Pro</p>
+                    <p class="version-storage">1TB</p>
+                    <p class="version-role">适合常规高压环境，稳定接管大部分场面。</p>
+                    <p class="version-price">¥9,999</p>
+                    <a href="#faq" class="version-cta">查看说明</a>
+                </article>
+
+                <article class="version-card featured reveal">
+                    <div class="featured-tag">推荐版本</div>
+                    <p class="version-name">SW-NB 15 Pro Max</p>
+                    <p class="version-storage">2TB</p>
+                    <p class="version-role">完整版配置，适合把亮相、记录和火力全部拉满。</p>
+                    <p class="version-price">¥12,999</p>
+                    <a href="#faq" class="version-cta featured-cta">查看完整说明</a>
+                </article>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="launch-section faq-section">
+            <div class="launch-copy reveal">
+                <p class="section-kicker">COMMON QUESTIONS</p>
+                <h2 class="launch-title">最后，再把问题讲清楚</h2>
+                <p class="launch-desc">参数已经看完，剩下的，都是最常被追问的部分。</p>
+            </div>
+
+            <div class="faq-list reveal">
+                <details>
+                    <summary>为什么续航只有 3 小时？</summary>
+                    <p>因为能量全部优先给到了瞬时爆发、场面压制和高亮时刻。它不是慢热路线，而是高峰值路线。</p>
+                </details>
+                <details>
+                    <summary>2TB 到底都装什么？</summary>
+                    <p>照片、聊天记录、语音、截图、回放和那些不想删也不该删的片段，都会被完整归档。</p>
+                </details>
+                <details>
+                    <summary>是否支持长期稳定使用？</summary>
+                    <p>支持，但建议在高强度场景结束后及时补能。毕竟完整版体验，从来都不是低功耗产物。</p>
+                </details>
+                <details>
+                    <summary>为什么现在只能展示，暂时不能下单？</summary>
+                    <p>因为当前页面属于发布会展示版本，版本、价格与配置已经公开，正式发售仍待进一步通知。</p>
+                </details>
+            </div>
+
+            <div class="faq-actions reveal">
+                <a href="#versions" class="faq-btn primary-btn">查看完整版本</a>
+                <a href="#hero" class="faq-btn ghost-btn">返回顶部</a>
+            </div>
+        </section>
+
+        <footer class="site-footer">
+            <p>SW-NB INC. 2026</p>
+            <p>发布会下半场到此结束。其余传说，请以实机体验为准。</p>
         </footer>
     </div>
 
     <!-- 逻辑脚本 -->
-    <script src="script.js"></script>
+    <script src="script.js?v=20260321b"></script>
 </body>
 </html>
+
+

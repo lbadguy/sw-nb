@@ -1,102 +1,203 @@
-// 震撼弹式的开机逻辑
-window.addEventListener('load', () => {
-    // 设定总等待时间 2.5 秒
-    setTimeout(() => {
-        const loader = document.getElementById('loader');
-        loader.style.opacity = '0';
-        setTimeout(() => {
-            loader.style.visibility = 'hidden';
-            // 页面出现后触发进场特效
-            reveal();
-        }, 800);
-    }, 2500);
-});
+const LOADER_MIN_MS = 650;
+const LOADER_MAX_MS = 1400;
 
-// 视差滚动触发器 (Scroll Reveal)
+const loader = document.getElementById("loader");
+const canvas = document.getElementById("particles-js");
+const ctx = canvas ? canvas.getContext("2d", { alpha: false }) : null;
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const smallScreenQuery = window.matchMedia("(max-width: 768px)");
+
+let loaderDismissed = false;
+let particlesArray = [];
+let animationFrameId = null;
+let particlesStarted = false;
+let resizeTimer = null;
+let tiltInitialized = false;
+const loaderStartedAt = performance.now();
+
 function reveal() {
-    var reveals = document.querySelectorAll(".reveal");
-    var windowHeight = window.innerHeight;
-    for (var i = 0; i < reveals.length; i++) {
-        var elementTop = reveals[i].getBoundingClientRect().top;
-        // 当元素进入视口一定比例时触发
+    const reveals = document.querySelectorAll(".reveal");
+    const windowHeight = window.innerHeight;
+
+    for (const element of reveals) {
+        const elementTop = element.getBoundingClientRect().top;
         if (elementTop < windowHeight - 100) {
-            reveals[i].classList.add("active");
+            element.classList.add("active");
         }
     }
 }
-// 使用 passive true 提升滚动性能
-window.addEventListener("scroll", reveal, { passive: true });
 
-// Vanilla Canvas Particles (背景极客星辰特效)
-const canvas = document.getElementById('particles-js');
-const ctx = canvas.getContext('2d', { alpha: false }); // alpha: false can improve performance on pure black backgrounds
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function initTilt() {
+    if (tiltInitialized || !window.VanillaTilt) {
+        return;
+    }
 
-let particlesArray = [];
+    const tiltTargets = document.querySelectorAll("[data-tilt]");
+    if (!tiltTargets.length) {
+        return;
+    }
+
+    window.VanillaTilt.init(tiltTargets);
+    tiltInitialized = true;
+}
+
+window.initTilt = initTilt;
+
+function hideLoader() {
+    if (loaderDismissed || !loader) {
+        return;
+    }
+
+    loaderDismissed = true;
+    loader.classList.add("is-hidden");
+    reveal();
+    initTilt();
+    startParticles();
+}
+
+function scheduleLoaderHide() {
+    const elapsed = performance.now() - loaderStartedAt;
+    const delay = Math.max(0, LOADER_MIN_MS - elapsed);
+    window.setTimeout(hideLoader, delay);
+}
+
+function syncCanvasSize() {
+    if (!canvas) {
+        return;
+    }
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
 class Particle {
-    constructor(x, y, dx, dy, size, baseColorAlpha) {
-        this.x = x; this.y = y;
-        this.dx = dx; this.dy = dy;
-        this.size = size; 
-        this.baseColorAlpha = baseColorAlpha;
+    constructor(x, y, dx, dy, size, opacity) {
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.size = size;
+        this.opacity = opacity;
     }
+
     draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-        // [性能优化优化] 移除巨耗性能的 shadowBlur, 直接使用填色
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.baseColorAlpha})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
         ctx.fill();
     }
+
     update() {
-        if (this.x > canvas.width || this.x < 0) this.dx = -this.dx;
-        if (this.y > canvas.height || this.y < 0) this.dy = -this.dy;
-        this.x += this.dx; this.y += this.dy;
+        if (this.x > canvas.width || this.x < 0) {
+            this.dx = -this.dx;
+        }
+        if (this.y > canvas.height || this.y < 0) {
+            this.dy = -this.dy;
+        }
+
+        this.x += this.dx;
+        this.y += this.dy;
         this.draw();
     }
 }
 
 function initParticles() {
+    if (!canvas || !ctx) {
+        return;
+    }
+
     particlesArray = [];
-    // [性能优化] 减少粒子数量密度，配合大尺寸屏幕
-    let numberOfParticles = (canvas.height * canvas.width) / 15000;
-    
-    // 限制最大粒子数目，防止移动端或超大屏卡顿
-    if(numberOfParticles > 150) numberOfParticles = 150; 
-    
-    for (let i = 0; i < numberOfParticles; i++) {
-        let size = (Math.random() * 2) + 0.5;
-        let x = Math.random() * canvas.width;
-        let y = Math.random() * canvas.height;
-        let dx = (Math.random() * 1.5) - 0.75;
-        let dy = (Math.random() * 1.5) - 0.75;
-        let baseColorAlpha = Math.random() * 0.5 + 0.1;
-        particlesArray.push(new Particle(x, y, dx, dy, size, baseColorAlpha));
+
+    const area = canvas.width * canvas.height;
+    const targetCount = smallScreenQuery.matches ? area / 32000 : area / 22000;
+    const maxCount = smallScreenQuery.matches ? 42 : 90;
+    const numberOfParticles = Math.max(18, Math.min(Math.floor(targetCount), maxCount));
+
+    for (let i = 0; i < numberOfParticles; i += 1) {
+        const size = Math.random() * 1.5 + 0.4;
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const dx = Math.random() * 1 - 0.5;
+        const dy = Math.random() * 1 - 0.5;
+        const opacity = Math.random() * 0.35 + 0.08;
+        particlesArray.push(new Particle(x, y, dx, dy, size, opacity));
     }
 }
 
 function animateParticles() {
-    requestAnimationFrame(animateParticles);
-    // Draw solid black background to clear instead of clearRect (better for some devices when alpha:false)
-    ctx.fillStyle = '#000000';
+    if (!canvas || !ctx || reducedMotionQuery.matches) {
+        return;
+    }
+
+    animationFrameId = window.requestAnimationFrame(animateParticles);
+    ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
+
+    for (const particle of particlesArray) {
+        particle.update();
     }
 }
 
-// 防抖 resize
-let resizeTimer;
-window.addEventListener('resize', () => {
+function startParticles() {
+    if (particlesStarted || !canvas || !ctx || reducedMotionQuery.matches) {
+        return;
+    }
+
+    particlesStarted = true;
+    syncCanvasSize();
+    initParticles();
+    animateParticles();
+}
+
+function stopParticles() {
+    if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    particlesStarted = false;
+
+    if (canvas && ctx) {
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function onReady() {
+    reveal();
+    window.addEventListener("scroll", reveal, { passive: true });
+    scheduleLoaderHide();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", onReady, { once: true });
+} else {
+    onReady();
+}
+
+window.addEventListener("load", scheduleLoaderHide, { once: true });
+window.setTimeout(hideLoader, LOADER_MAX_MS);
+
+window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        initParticles();
-    }, 200);
+    resizeTimer = window.setTimeout(() => {
+        syncCanvasSize();
+        if (particlesStarted) {
+            initParticles();
+        }
+        reveal();
+    }, 150);
 });
 
-initParticles();
-animateParticles();
+if (typeof reducedMotionQuery.addEventListener === "function") {
+    reducedMotionQuery.addEventListener("change", (event) => {
+        if (event.matches) {
+            stopParticles();
+            return;
+        }
+
+        if (loaderDismissed) {
+            startParticles();
+        }
+    });
+}
