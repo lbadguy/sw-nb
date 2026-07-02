@@ -13,8 +13,12 @@
   /* Background & Glass Surfaces */
   --bg-app: #f1f5f9;
   --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-shell: rgba(255, 255, 255, 0.75);
+  --bg-surface: #ffffff;
+  --bg-subtle: rgba(241, 245, 249, 0.9);
   --border-glass: rgba(255, 255, 255, 0.8);
   --border-light: #e2e8f0;
+  --overlay-bg: rgba(15, 23, 42, 0.65);
   
   /* Typography */
   --text-main: #0f172a;
@@ -30,6 +34,26 @@
   --shadow-lg: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
   --shadow-hover: 0 25px 50px -12px rgba(79, 70, 229, 0.18);
   --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] {
+  --grad-surface: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(15, 23, 42, 0.92) 100%);
+  --primary: #818cf8;
+  --primary-glow: rgba(129, 140, 248, 0.28);
+  --bg-app: #020617;
+  --bg-glass: rgba(15, 23, 42, 0.78);
+  --bg-shell: rgba(2, 6, 23, 0.78);
+  --bg-surface: #0f172a;
+  --bg-subtle: rgba(30, 41, 59, 0.78);
+  --border-glass: rgba(148, 163, 184, 0.12);
+  --border-light: rgba(148, 163, 184, 0.18);
+  --overlay-bg: rgba(2, 6, 23, 0.82);
+  --text-main: #e2e8f0;
+  --text-sub: #cbd5e1;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 10px 30px rgba(2, 6, 23, 0.35);
+  --shadow-lg: 0 24px 60px rgba(2, 6, 23, 0.38);
+  --shadow-hover: 0 30px 70px rgba(15, 23, 42, 0.5);
 }
 
 * {
@@ -128,7 +152,7 @@ button {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--bg-shell);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
@@ -138,6 +162,12 @@ button {
   padding: 0 36px;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .brand-logo {
@@ -176,6 +206,27 @@ button {
   box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
 }
 
+.btn-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  font-size: 14px;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.btn-theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: rgba(79, 70, 229, 0.35);
+  color: var(--primary);
+}
+
 /* ==========================================================================
    Left Sidebar Navigation
    ========================================================================== */
@@ -185,7 +236,7 @@ button {
   left: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--bg-glass);
   backdrop-filter: blur(20px);
   border-right: 1px solid rgba(226, 232, 240, 0.8);
   padding: 28px 16px;
@@ -215,7 +266,7 @@ button {
 }
 
 .sidebar-item:hover {
-  background: rgba(241, 245, 249, 0.9);
+  background: var(--bg-subtle);
   color: var(--primary);
   transform: translateX(4px);
 }
@@ -393,7 +444,7 @@ button {
 }
 
 .subproject-bar {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 14px 24px;
@@ -431,7 +482,7 @@ button {
   height: calc(100vh - 190px);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
@@ -445,7 +496,7 @@ button {
 }
 
 .post-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: var(--radius-lg);
   padding: 28px 32px;
@@ -542,7 +593,7 @@ button {
   font-size: 13.5px;
   color: var(--text-sub);
   font-weight: 600;
-  background: rgba(241, 245, 249, 0.8);
+  background: var(--bg-subtle);
   padding: 6px 14px;
   border-radius: 20px;
 }
@@ -556,7 +607,7 @@ button {
   margin-top: 20px;
   border-radius: 16px;
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   border: 1px solid var(--border-light);
 }
 
@@ -703,7 +754,7 @@ button {
 }
 
 .summary-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 20px;
@@ -734,7 +785,7 @@ button {
 }
 
 .admin-section-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   padding: 24px 28px;
@@ -822,7 +873,7 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--overlay-bg);
   backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
@@ -839,7 +890,7 @@ button {
 }
 
 .modal-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   width: 90%;
   max-width: 760px;
   border-radius: var(--radius-lg);
@@ -884,7 +935,7 @@ button {
 }
 
 .btn-close:hover {
-  background: #e2e8f0;
+  background: var(--border-light);
   color: var(--text-main);
 }
 
@@ -920,7 +971,7 @@ button {
 
 .form-input:focus, .form-textarea:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
 
@@ -1011,3 +1062,70 @@ button {
   margin-right: 8px;
 }
 
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(at 12% 10%, rgba(99, 102, 241, 0.16) 0px, transparent 42%),
+    radial-gradient(at 90% 12%, rgba(236, 72, 153, 0.12) 0px, transparent 38%),
+    radial-gradient(at 50% 90%, rgba(6, 182, 212, 0.1) 0px, transparent 34%);
+}
+
+[data-theme="dark"] .brand-logo {
+  -webkit-text-fill-color: initial;
+  color: #e2e8f0;
+  background: none;
+}
+
+[data-theme="dark"] .hero-card,
+[data-theme="dark"] .post-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .admin-section-card,
+[data-theme="dark"] .subproject-bar,
+[data-theme="dark"] .modal-card {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+[data-theme="dark"] .btn-back-home,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .btn-close,
+[data-theme="dark"] .visitor-info-card {
+  background: var(--bg-subtle);
+}
+
+[data-theme="dark"] .custom-toast {
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.48);
+}
+
+[data-theme="dark"] .btn-theme-toggle {
+  background: rgba(30, 41, 59, 0.88);
+}
+
+[data-theme="dark"] .topic-tag {
+  background: rgba(129, 140, 248, 0.16);
+  color: #c7d2fe;
+}
+
+[data-theme="dark"] .admin-table th {
+  background: rgba(30, 41, 59, 0.72);
+}
+
+[data-theme="dark"] .post-footer,
+[data-theme="dark"] .admin-section-head,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .admin-table td {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+[data-theme="dark"] .file-upload-label {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme="dark"] .subproject-iframe {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="dark"] .btn-external-home {
+  background: rgba(129, 140, 248, 0.1);
+  border-color: rgba(129, 140, 248, 0.22);
+}

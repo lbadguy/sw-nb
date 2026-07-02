@@ -18,6 +18,7 @@ const normalizePostRecord = Shared.normalizePostRecord || function (item) { retu
 const safeStorageGet = Shared.safeStorageGet || function () { return null; };
 const safeStorageSet = Shared.safeStorageSet || function () { return false; };
 const safeStorageRemove = Shared.safeStorageRemove || function () { return false; };
+const THEME_STORAGE_KEY = 'swnb_theme';
 
 /** 图片 URL 安全校验 — 仅允许 http/https/data 协议 */
 function sanitizeImageUrl(url) {
@@ -83,6 +84,53 @@ function toggleModal(modalId, show) {
     if (show) modal.classList.add('active');
     else modal.classList.remove('active');
   }
+}
+
+function updateThemeToggleButton(theme) {
+  var btn = document.getElementById('themeToggleBtn');
+  if (!btn) return;
+
+  var isDark = theme === 'dark';
+  var nextLabel = isDark ? '浅色' : '深色';
+  btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+  btn.setAttribute('title', '切换到' + nextLabel + '模式');
+  btn.innerHTML = isDark
+    ? '<span>☀️</span><span>浅色</span>'
+    : '<span>🌙</span><span>深色</span>';
+}
+
+function applyTheme(theme) {
+  var resolvedTheme = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = resolvedTheme;
+  updateThemeToggleButton(resolvedTheme);
+}
+
+function getPreferredTheme() {
+  var storedTheme = safeStorageGet(window.localStorage, THEME_STORAGE_KEY, '');
+  if (storedTheme === 'dark' || storedTheme === 'light') {
+    return storedTheme;
+  }
+
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+
+  return 'light';
+}
+
+function toggleTheme() {
+  var currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  var nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(nextTheme);
+  safeStorageSet(window.localStorage, THEME_STORAGE_KEY, nextTheme);
+}
+
+function initThemeToggle() {
+  applyTheme(getPreferredTheme());
+
+  var btn = document.getElementById('themeToggleBtn');
+  if (!btn) return;
+  btn.addEventListener('click', toggleTheme);
 }
 
 // ==========================================
@@ -1078,6 +1126,7 @@ function closeArticleModal() {
 // INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
+  initThemeToggle();
   initSupabase();
   initVisitorTracking();
   loadPosts();
