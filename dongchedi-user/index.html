@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我要娶一个旅行车 的主页 - 懂车帝</title>
+  <meta name="description" content="我要娶一个旅行车在懂车帝发布的所有精彩帖子与测评文章。重点展示丰富的旅行车自驾游攻略、车型深度改装与试驾对比。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-header">
+    <div class="header-left">
+      <a href="#" class="brand-logo">
+        <span class="brand-icon">帝</span>
+        <span>懂车帝</span>
+      </a>
+    </div>
+    <div class="header-center">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜车、看车、选车、买车...">
+        <button class="search-btn">搜索</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="nav-link">业务合作</span>
+      <span class="nav-link">下载App</span>
+      <button class="btn-publish">+ 发布作品</button>
+      <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=100&auto=format&fit=crop&q=80" style="width:32px;height:32px;border-radius:50%;cursor:pointer;" alt="个人头像">
+    </div>
+  </header>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <span class="sidebar-icon">🏠</span>
+        <span>首页</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">🚘</span>
+        <span>选车</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">🔄</span>
+        <span>二手车</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">🎬</span>
+        <span>视频</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">📰</span>
+        <span>资讯</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">⭕</span>
+        <span>车友圈</span>
+      </li>
+      <li class="sidebar-item">
+        <span class="sidebar-icon">🏆</span>
+        <span>排行榜</span>
+      </li>
+      <li class="sidebar-item active">
+        <span class="sidebar-icon">👤</span>
+        <span>我的</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <!-- User Profile Header Card -->
+    <section class="profile-card">
+      <div class="profile-info-left">
+        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&auto=format&fit=crop&q=80" class="avatar-large" alt="用户头像">
+        <div class="user-meta">
+          <div class="user-name">
+            <span>我要娶一个旅行车</span>
+            <span class="user-badge">懂车帝创作者</span>
+          </div>
+          <div class="user-bio">这个人很懒，什么都没写~</div>
+        </div>
+      </div>
+      <div class="profile-stats-right">
+        <div class="stat-item">
+          <span class="stat-num">22</span>
+          <span class="stat-label">粉丝</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">5</span>
+          <span class="stat-label">关注</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">389</span>
+          <span class="stat-label">获赞</span>
+        </div>
+        <button id="followBtn" class="btn-follow" onclick="toggleFollow()">
+          <span>✓</span> 已关注
+        </button>
+      </div>
+    </section>
+
+    <!-- Tabs Navigation Card -->
+    <section class="tabs-card">
+      <ul class="tabs-list">
+        <li class="tab-item active" data-tab="all" onclick="switchTab('all')">全部作品 (5)</li>
+        <li class="tab-item" data-tab="liked" onclick="switchTab('liked')">喜欢 (2)</li>
+      </ul>
+      <div class="filter-hint">💡 点击帖子任意区域可沉浸查看全文及车友评论</div>
+    </section>
+
+    <!-- Posts Feed Container -->
+    <section id="feedList" class="feed-container">
+      <!-- Dynamically rendered by app.js -->
+    </section>
+  </main>
+
+  <!-- Interactive Article Modal (Pop-up Detail View) -->
+  <div id="articleModal" class="modal-overlay" onclick="closeArticleModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span style="font-weight: 700; font-size: 16px; color: #1f2329;">帖子详情</span>
+        <button class="modal-close-btn" onclick="closeArticleModal()">✕</button>
+      </div>
+      <div id="modalBodyContent" class="modal-body">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared-browser-utils.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
