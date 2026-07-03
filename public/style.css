@@ -1007,9 +1007,73 @@ button {
 @media (max-width: 768px) {
   body {
     padding-left: 0;
+    padding-bottom: 86px;
+  }
+  .top-header {
+    padding: 0 16px;
+  }
+  .brand-logo {
+    font-size: 21px;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+  .btn-theme-toggle {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+  .btn-publish {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .btn-theme-toggle span:last-child,
+  .btn-publish span:last-child {
+    display: none;
   }
   .sidebar {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: 72px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-right: 0;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    justify-content: center;
+  }
+  .sidebar-footer {
     display: none;
+  }
+  .sidebar-menu {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .sidebar-item {
+    flex: 0 0 auto;
+    min-width: 78px;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .sidebar-item:hover {
+    transform: none;
+  }
+  .sidebar-icon {
+    font-size: 18px;
+  }
+  .main-wrapper {
+    margin: 20px auto;
+    padding: 0 16px;
   }
   .hero-card {
     flex-direction: column;

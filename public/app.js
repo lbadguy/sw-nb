@@ -13,21 +13,29 @@
 
 const Shared = window.SwnbShared || {};
 const escapeHtml = Shared.escapeHtml || function (str) { return String(str || ''); };
+const formatRelativeTime = Shared.formatRelativeTime || function (input) { return String(input || '时间未知'); };
 const getOrCreateVisitorKey = Shared.getOrCreateVisitorKey || function () { return 'visitor_ephemeral'; };
+const htmlToPlainText = Shared.htmlToPlainText || function (html) { return String(html || ''); };
 const normalizePostRecord = Shared.normalizePostRecord || function (item) { return item; };
 const safeStorageGet = Shared.safeStorageGet || function () { return null; };
 const safeStorageSet = Shared.safeStorageSet || function () { return false; };
 const safeStorageRemove = Shared.safeStorageRemove || function () { return false; };
 const THEME_STORAGE_KEY = 'swnb_theme';
 
-/** 图片 URL 安全校验 — 仅允许 http/https/data 协议 */
+function escapeAttribute(str) {
+  return escapeHtml(str);
+}
+
+/** 图片 URL 安全校验 — 仅允许 http/https 和本地生成的 base64 图片 */
 function sanitizeImageUrl(url) {
   if (!url) return '';
   const trimmed = String(url).trim();
-  if (trimmed.startsWith('data:image/')) return trimmed;
+  if (/^data:image\/(?:png|jpe?g|gif|webp);base64,[a-z0-9+/=\s]+$/i.test(trimmed)) {
+    return trimmed.replace(/\s/g, '');
+  }
   try {
     const parsed = new URL(trimmed);
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return trimmed;
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
     return '';
   } catch {
     return '';
@@ -141,10 +149,13 @@ const App = {
   adminPassword: '',
   isAdminUnlocked: false,
   pendingAdminAction: '',
-  currentVisitorIp: '127.0.0.1 (真实访客)',
+  currentVisitorIp: '公网 IP 获取失败',
   currentVisitorKey: 'visitor_ephemeral',
   currentVisitorLogId: Date.now(),
+  currentArticleId: null,
   editingPostId: null,
+  isSubmittingPost: false,
+  isSavingPost: false,
   // 默认/回退文章数据
   postsData: [
     {
@@ -152,11 +163,13 @@ const App = {
       title: '🚀 [系统公告] SW-nb 个人全栈门户与云端实时动态发布上线！',
       topic: '#全站公告',
       snippet: '欢迎来到 SW-nb 全新门户！本站已成功接入 Supabase 云端数据库，支持全网实时动态发布、单 IP 每日发帖频控防刷保护，支持批量传图与剪切板直接粘贴图片！',
-      time: '刚刚',
+      time: '时间未知',
+      timeSource: '',
       views: 1,
       images: [
         'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80'
       ],
+      contentText: '欢迎来到 SW-nb 全新门户！本站已成功接入 Supabase 云端数据库，支持全网实时动态发布、单 IP 每日发帖频控防刷保护，支持批量传图与剪切板直接粘贴图片！\n已彻底移除繁杂的点赞与收藏，转为精炼纯粹的点击阅读量统计。点击正文里的每一张照片右上角均可直接下载原图！',
       fullContent: '<p>欢迎来到 SW-nb 全新门户！本站已成功接入 Supabase 云端数据库，支持全网实时动态发布、单 IP 每日发帖频控防刷保护，支持批量传图与剪切板直接粘贴图片！</p><p>已彻底移除繁杂的点赞与收藏，转为精炼纯粹的点击阅读量统计。点击正文里的每一张照片右上角均可直接下载原图！</p>'
     }
   ]
@@ -166,20 +179,19 @@ const App = {
 // IMAGE MANAGER — 统一管理发布/编辑的多图状态
 // ==========================================
 const ImageManager = {
-  // 每张图存储为 { thumb: '压缩预览', original: '原始高清' }
+  // 每张图存储为 { thumb: '压缩预览', original: '下载图' }
   uploadImages: [],
   editImages: [],
 
-  /** 添加本地图片 (自动生成压缩缩略图，保留原始高清图) */
+  /** 添加本地图片 (压缩后再入库，避免 base64 原图拖慢发布和渲染) */
   async add(base64, isEdit) {
     const arr = isEdit ? this.editImages : this.uploadImages;
     if (arr.length >= 9) {
       showToast('最多上传 9 张图片', 'error');
       return false;
     }
-    const original = base64;
-    const thumb = await compressImage(base64, 1200, 0.7);
-    arr.push({ thumb, original });
+    const compressed = await compressImage(base64, 1200, 0.72);
+    arr.push({ thumb: compressed, original: compressed });
     return true;
   },
 
@@ -213,9 +225,14 @@ const ImageManager = {
   /** 从旧格式数据加载 (兼容纯字符串数组和新 {thumb,original} 格式) */
   loadFromData(images, isEdit) {
     const arr = (images || []).map(img => {
-      if (typeof img === 'string') return { thumb: img, original: img };
-      return img;
-    });
+      if (typeof img === 'string') {
+        var safe = sanitizeImageUrl(img);
+        return safe ? { thumb: safe, original: safe } : null;
+      }
+      var thumb = getImageThumb(img);
+      var original = getImageOriginal(img) || thumb;
+      return thumb ? { thumb, original } : null;
+    }).filter(Boolean);
     if (isEdit) this.editImages = arr;
     else this.uploadImages = arr;
   },
@@ -293,15 +310,40 @@ function removeStoredValue(key, failureMessage) {
   return ok;
 }
 
-async function callRpc(functionName, args) {
-  if (!App.supabaseClient) initSupabase();
-  if (!App.supabaseClient) {
-    throw new Error('Supabase client unavailable');
+async function callBlogApi(path, payload) {
+  const response = await fetch(SUPABASE_URL + '/functions/v1/blog-api' + path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload || {}),
+  });
+
+  let json = null;
+  try {
+    json = await response.json();
+  } catch {
+    json = null;
   }
 
-  const result = await App.supabaseClient.rpc(functionName, args);
-  if (result.error) throw result.error;
-  return result.data;
+  if (!response.ok) {
+    throw new Error((json && json.error) || 'Blog API request failed');
+  }
+
+  return json ? json.data : null;
+}
+
+function setButtonBusy(buttonId, busy, label) {
+  var button = document.getElementById(buttonId);
+  if (!button) return;
+
+  if (!button.dataset.idleLabel) {
+    button.dataset.idleLabel = button.innerHTML;
+  }
+
+  button.disabled = !!busy;
+  button.setAttribute('aria-busy', busy ? 'true' : 'false');
+  button.innerHTML = busy ? escapeHtml(label || '处理中...') : button.dataset.idleLabel;
 }
 
 function ensureAdminSession(actionLabel) {
@@ -317,6 +359,14 @@ function mapPostFromRecord(record) {
   const mapped = normalizePostRecord(record);
   if (record && record.likes === 666) mapped.views = 1;
   return mapped;
+}
+
+function getPostDisplayTime(post) {
+  if (!post) return '时间未知';
+  if (post.timeSource) {
+    return formatRelativeTime(post.timeSource) || '时间未知';
+  }
+  return post.time || '时间未知';
 }
 
 function replacePostInState(post) {
@@ -340,10 +390,23 @@ function clearAdminUnlockState() {
 function loadCachedPosts() {
   const localSaved = readJsonStorage('swnb_premium_posts', []);
   if (Array.isArray(localSaved) && localSaved.length > 0) {
-    App.postsData = localSaved;
+    App.postsData = localSaved.map(mapPostFromRecord);
     return true;
   }
   return false;
+}
+
+function refreshRelativePostTimes() {
+  if (!App.postsData || App.postsData.length === 0) return;
+  App.postsData.forEach(function (post) {
+    post.time = getPostDisplayTime(post);
+  });
+  renderPostList();
+
+  var modal = document.getElementById('articleModal');
+  if (modal && modal.classList.contains('active') && App.currentArticleId) {
+    openArticleModal(App.currentArticleId, { skipSync: true, skipAction: true });
+  }
 }
 
 // ==========================================
@@ -381,16 +444,62 @@ const debouncedSaveVisitorLogs = debounce((logs) => {
   persistVisitorLogs(logs, false);
 }, 2000);
 
-async function initVisitorTracking() {
-  App.currentVisitorKey = getOrCreateVisitorKey(window.localStorage);
+function isPublicVisitorIp(ip) {
+  if (!ip || typeof ip !== 'string') return false;
+  var value = ip.trim();
+
+  var ipv4 = value.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    var parts = ipv4.slice(1).map(function (part) { return Number(part); });
+    if (parts.some(function (part) { return part < 0 || part > 255; })) return false;
+    if (parts[0] === 10 || parts[0] === 127 || parts[0] === 0) return false;
+    if (parts[0] === 169 && parts[1] === 254) return false;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return false;
+    if (parts[0] === 192 && parts[1] === 168) return false;
+    return true;
+  }
+
+  var lower = value.toLowerCase();
+  if (lower === '::1' || lower.startsWith('fc') || lower.startsWith('fd') || lower.startsWith('fe80')) {
+    return false;
+  }
+  return lower.includes(':');
+}
+
+async function fetchJsonWithTimeout(url, timeoutMs) {
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timeoutId = controller ? setTimeout(function () { controller.abort(); }, timeoutMs) : null;
 
   try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const json = await res.json();
-    if (json.ip) App.currentVisitorIp = json.ip;
-  } catch {
-    // 静默降级，使用默认 IP 标识
+    var response = await fetch(url, controller ? { signal: controller.signal } : undefined);
+    if (!response.ok) throw new Error('IP lookup failed');
+    return await response.json();
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
+}
+
+async function resolveVisitorIp() {
+  try {
+    var edgeJson = await fetchJsonWithTimeout('/api/visitor-ip', 1800);
+    if (edgeJson && isPublicVisitorIp(edgeJson.ip)) return edgeJson.ip.trim();
+  } catch {
+    // Local file preview or old deployments will not have the Worker endpoint yet.
+  }
+
+  try {
+    var publicJson = await fetchJsonWithTimeout('https://api.ipify.org?format=json', 2500);
+    if (publicJson && isPublicVisitorIp(publicJson.ip)) return publicJson.ip.trim();
+  } catch {
+    // Keep explicit failure label below.
+  }
+
+  return '公网 IP 获取失败';
+}
+
+async function initVisitorTracking() {
+  App.currentVisitorKey = getOrCreateVisitorKey(window.localStorage);
+  App.currentVisitorIp = await resolveVisitorIp();
 
   let logs = readJsonStorage('swnb_visitor_logs', []);
 
@@ -542,7 +651,7 @@ function renderMultiImagePreviews(previewGridId, isEdit) {
   grid.innerHTML = arr.map(function (imgObj, idx) {
     var thumbUrl = getImageThumb(imgObj);
     return '<div class="thumb-item">' +
-      '<img src="' + thumbUrl + '" alt="预览图 ' + (idx + 1) + '">' +
+      '<img src="' + escapeAttribute(thumbUrl) + '" alt="预览图 ' + (idx + 1) + '">' +
       '<div class="thumb-del-btn" onclick="removeUploadedImage(' + idx + ', \'' + previewGridId + '\', ' + isEdit + ')" title="移除此图">✕</div>' +
     '</div>';
   }).join('');
@@ -602,29 +711,31 @@ document.addEventListener('paste', async function (e) {
 async function loadPosts() {
   if (!App.supabaseClient) initSupabase();
 
-  if (App.supabaseClient) {
-    try {
-      var result = await App.supabaseClient
-        .from('posts')
-        .select('*')
-        .order('id', { ascending: false });
+  var renderedFromCache = loadCachedPosts();
+  renderPostList();
+  renderAdminArticleTable();
+  if (!App.supabaseClient) return;
 
-      if (result.error) throw result.error;
+  try {
+    var result = await App.supabaseClient
+      .from('posts')
+      .select('*')
+      .order('id', { ascending: false });
 
-      if (result.data && result.data.length > 0) {
-        App.postsData = result.data.map(mapPostFromRecord);
-        persistPostsCache(false);
-      } else if (!loadCachedPosts()) {
-        App.postsData = [];
-      }
-    } catch (e) {
-      console.warn('读取云端异常，使用本地缓存:', e);
-      loadCachedPosts();
-      showToast('云端同步失败，已加载本地缓存数据', 'error');
+    if (result.error) throw result.error;
+
+    if (result.data && result.data.length > 0) {
+      App.postsData = result.data.map(mapPostFromRecord);
+      persistPostsCache(false);
+    } else if (!renderedFromCache) {
+      App.postsData = [];
     }
-  } else {
-    loadCachedPosts();
+  } catch (e) {
+    console.warn('读取云端异常，使用本地缓存:', e);
+    if (!renderedFromCache) loadCachedPosts();
+    showToast('云端同步失败，已加载本地缓存数据', 'error');
   }
+
   renderPostList();
   renderAdminArticleTable();
 }
@@ -651,7 +762,7 @@ function renderPostList() {
       var imgTags = post.images.map(function (img) {
         var thumbUrl = getImageThumb(img);
         return thumbUrl
-          ? '<img src="' + thumbUrl + '" class="post-img" alt="配图" loading="lazy">'
+          ? '<img src="' + escapeAttribute(thumbUrl) + '" class="post-img" alt="配图" loading="lazy">'
           : '';
       }).filter(Boolean).join('');
       if (imgTags) {
@@ -662,7 +773,7 @@ function renderPostList() {
     article.innerHTML =
       '<div class="post-card-header">' +
         '<span class="topic-tag">' + escapeHtml(post.topic) + '</span>' +
-        '<span class="post-time">📅 ' + escapeHtml(post.time) + '</span>' +
+        '<span class="post-time">📅 ' + escapeHtml(getPostDisplayTime(post)) + '</span>' +
       '</div>' +
       '<h3 class="post-title">' + escapeHtml(post.title) + '</h3>' +
       '<div class="post-snippet">' + escapeHtml(post.snippet) + '</div>' +
@@ -742,7 +853,7 @@ function closeAdminAuthModal() {
   toggleModal('adminAuthModal', false);
 }
 
-/** 管理员密码验证 — 交由 Supabase RPC 在服务端校验 */
+/** 管理员密码验证 — 交由 Supabase Edge Function 在服务端校验 */
 async function verifyAdminAuth() {
   var pass = document.getElementById('adminPassInput').value.trim();
   if (!pass) {
@@ -753,7 +864,7 @@ async function verifyAdminAuth() {
   }
 
   try {
-    var isValid = await callRpc('verify_admin_password_rpc', { admin_password: pass });
+    var isValid = await callBlogApi('/admin/verify', { admin_password: pass });
     if (isValid) {
       setAdminUnlockState(pass);
       closeAdminAuthModal();
@@ -844,7 +955,7 @@ async function deleteArticle(id) {
   if (!ensureAdminSession()) return;
 
   try {
-    var deleted = await callRpc('delete_post_rpc', {
+    var deleted = await callBlogApi('/posts/delete', {
       admin_password: App.adminPassword,
       target_post_id: id
     });
@@ -880,9 +991,7 @@ function openEditArticleModal(id) {
   }
   document.getElementById('editImgUrl').value = '';
 
-  var rawContent = post.fullContent
-    ? post.fullContent.replace(/<\/?p>/g, '\n').trim()
-    : post.snippet;
+  var rawContent = post.contentText || htmlToPlainText(post.fullContent) || post.snippet;
   document.getElementById('editContent').value = rawContent;
 
   toggleModal('editArticleModal', true);
@@ -896,6 +1005,10 @@ function closeEditArticleModal() {
 async function saveEditedArticle() {
   if (!App.editingPostId) return;
   if (!ensureAdminSession()) return;
+  if (App.isSavingPost) {
+    showToast('正在保存，请稍等', 'error');
+    return;
+  }
 
   var title = document.getElementById('editTitle').value.trim();
   var topic = document.getElementById('editTopic').value.trim() || '#日常分享';
@@ -915,8 +1028,11 @@ async function saveEditedArticle() {
   var post = App.postsData.find(function (p) { return p.id === App.editingPostId; });
   if (!post) return;
 
+  App.isSavingPost = true;
+  setButtonBusy('editSubmitBtn', true, '保存中...');
+
   try {
-    var updatedRow = await callRpc('update_post_rpc', {
+    var updatedRow = await callBlogApi('/posts/update', {
       admin_password: App.adminPassword,
       target_post_id: App.editingPostId,
       next_title: title,
@@ -930,6 +1046,9 @@ async function saveEditedArticle() {
     console.warn('云端同步提示:', e);
     showToast('云端同步失败，修改未保存', 'error');
     return;
+  } finally {
+    App.isSavingPost = false;
+    setButtonBusy('editSubmitBtn', false);
   }
 
   replacePostInState(post);
@@ -964,6 +1083,10 @@ function closePublishModal() {
 
 async function submitNewArticle() {
   if (!ensureAdminSession()) return;
+  if (App.isSubmittingPost) {
+    showToast('正在发布，请稍等', 'error');
+    return;
+  }
 
   var title = document.getElementById('pubTitle').value.trim();
   var topic = document.getElementById('pubTopic').value.trim() || '#日常分享';
@@ -980,14 +1103,17 @@ async function submitNewArticle() {
 
   var snippet = content.length > 95 ? content.substring(0, 95) + '...' : content;
 
+  App.isSubmittingPost = true;
+  setButtonBusy('publishSubmitBtn', true, '发布中...');
+
   try {
-    var createdRow = await callRpc('create_post_rpc', {
+    var createdRow = await callBlogApi('/posts/create', {
       admin_password: App.adminPassword,
       title: title,
       topic: topic,
       snippet: snippet,
       content: content,
-      time_str: '刚刚',
+      time_str: new Date().toISOString(),
       images: JSON.stringify(imgs)
     });
     replacePostInState(mapPostFromRecord(createdRow));
@@ -995,6 +1121,9 @@ async function submitNewArticle() {
     console.warn('推送到云端提示:', e);
     showToast('云端同步失败，文章未保存', 'error');
     return;
+  } finally {
+    App.isSubmittingPost = false;
+    setButtonBusy('publishSubmitBtn', false);
   }
 
   persistPostsCache(true);
@@ -1050,10 +1179,10 @@ function downloadArticleImage(postId, imageIndex) {
 }
 
 async function syncArticleViewCount(post) {
-  if (!post || !App.supabaseClient) return;
+  if (!post) return;
 
   try {
-    var nextViews = await callRpc('increment_post_views_rpc', {
+    var nextViews = await callBlogApi('/posts/view', {
       target_post_id: post.id,
       input_visitor_key: App.currentVisitorKey
     });
@@ -1076,8 +1205,11 @@ async function syncArticleViewCount(post) {
 function openArticleModal(id, options) {
   var post = App.postsData.find(function (p) { return p.id === id; });
   if (!post) return;
+  App.currentArticleId = id;
 
-  recordVisitorAction('点击阅读文章: ' + post.title);
+  if (!options || !options.skipAction) {
+    recordVisitorAction('点击阅读文章: ' + post.title);
+  }
 
   var bodyEl = document.getElementById('articleDetailContent');
 
@@ -1089,9 +1221,9 @@ function openArticleModal(id, options) {
       // 展示用压缩缩略图，下载按钮提供原始高清图
       return '<div class="article-img-box">' +
         '<button class="btn-download-img" onclick="event.stopPropagation(); downloadArticleImage(' + post.id + ', ' + idx + ')">' +
-          '<span>⬇️</span> 下载高清原图' +
+          '<span>⬇️</span> 下载图片' +
         '</button>' +
-        '<img src="' + thumbUrl + '" alt="文章配图" loading="lazy">' +
+        '<img src="' + escapeAttribute(thumbUrl) + '" alt="文章配图" loading="lazy">' +
       '</div>';
     }).filter(Boolean).join('');
 
@@ -1104,7 +1236,7 @@ function openArticleModal(id, options) {
     '<div style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">' +
       '<div>' +
         '<span class="topic-tag">' + escapeHtml(post.topic) + '</span>' +
-        '<span style="font-size:13px; color:var(--text-muted); margin-left:12px;">📅 ' + escapeHtml(post.time) + '</span>' +
+        '<span style="font-size:13px; color:var(--text-muted); margin-left:12px;">📅 ' + escapeHtml(getPostDisplayTime(post)) + '</span>' +
       '</div>' +
       '<span class="post-views-badge">👁️ ' + post.views + ' 次浏览</span>' +
     '</div>' +
@@ -1120,6 +1252,7 @@ function openArticleModal(id, options) {
 
 function closeArticleModal() {
   toggleModal('articleModal', false);
+  App.currentArticleId = null;
 }
 
 // ==========================================
@@ -1130,4 +1263,5 @@ document.addEventListener('DOMContentLoaded', function () {
   initSupabase();
   initVisitorTracking();
   loadPosts();
+  setInterval(refreshRelativePostTimes, 60000);
 });

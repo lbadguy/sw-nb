@@ -7,7 +7,7 @@
   <title>SW-nb Website</title>
   <meta name="description" content="SW-nb Website. Personal blog for SW-nb.">
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
   <script src="shared-browser-utils.js"></script>
 </head>
 
@@ -27,7 +27,8 @@
       </button>
 
       <button class="btn-publish" onclick="openPublishModal()">
-        <span>✨ 发布新文章</span>
+        <span>✨</span>
+        <span>发布新文章</span>
       </button>
     </div>
   </header>
@@ -53,7 +54,7 @@
       </li>
     </ul>
 
-    <div>
+    <div class="sidebar-footer">
       <a href="https://www.dongchedi.com/user/485359118462679" target="_blank" rel="noopener noreferrer"
         class="btn-external-home">
         <span>🏎️</span> <span>我 的 主 页</span>
@@ -124,10 +125,6 @@
           <span>⚙️</span> SW-nb 访客控制台与文章全权管理后台
         </div>
         <div style="display:flex; gap:10px;">
-          <button class="btn-back-home" style="background:rgba(239,68,68,0.1); color:#dc2626;"
-            onclick="resetVisitorStats()">
-            🗑️ 部署前清空测试数据
-          </button>
           <button class="btn-back-home" onclick="switchProject('blog', document.getElementById('navBlogItem'))">
             ← 退出控制台返回前台
           </button>
@@ -139,7 +136,7 @@
         <article class="summary-card">
           <span class="summary-label">👁️ 唯一 Views</span>
           <strong id="adminStatUniqueViews" class="summary-num">0</strong>
-          <span class="summary-desc">真实访客访问次数</span>
+          <span class="summary-desc">本设备记录的访问次数</span>
         </article>
         <article class="summary-card">
           <span class="summary-label">⚡ 总访问 Hits</span>
@@ -149,7 +146,7 @@
         <article class="summary-card">
           <span class="summary-label">🌐 监测访客 IP 数</span>
           <strong id="adminStatUniqueIps" class="summary-num">0</strong>
-          <span class="summary-desc">独立在线访客源 IP</span>
+          <span class="summary-desc">已识别公网 IP 数</span>
         </article>
         <article class="summary-card">
           <span class="summary-label">📋 明细记录数</span>
@@ -188,7 +185,7 @@
       <section class="admin-section-card">
         <div class="admin-section-head">
           <div class="admin-section-title">
-            <span>🛰️</span> 近期真实访客明细列表
+            <span>🛰️</span> 近期访客明细列表
           </div>
           <button class="btn-back-home" onclick="refreshAdminConsoleData()">🔄 刷新访客数据</button>
         </div>
@@ -269,9 +266,9 @@
         </div>
         <div class="form-group">
           <label class="form-label">正文故事 / 深度探讨</label>
-          <textarea id="pubContent" class="form-textarea" placeholder="写下想要分享的见解，注意同一个 IP 每天仅限发布 2 篇文章..."></textarea>
+          <textarea id="pubContent" class="form-textarea" placeholder="写下想要分享的见解..."></textarea>
         </div>
-        <button class="btn-submit" onclick="submitNewArticle()">🚀 发布</button>
+        <button id="publishSubmitBtn" class="btn-submit" onclick="submitNewArticle()">🚀 发布</button>
       </div>
     </div>
   </div>
@@ -310,7 +307,7 @@
           <label class="form-label">正文内容</label>
           <textarea id="editContent" class="form-textarea"></textarea>
         </div>
-        <button class="btn-submit" onclick="saveEditedArticle()">💾 保存修改并同步云端</button>
+        <button id="editSubmitBtn" class="btn-submit" onclick="saveEditedArticle()">💾 保存修改并同步云端</button>
       </div>
     </div>
   </div>
