@@ -26,7 +26,7 @@ function escapeAttribute(str) {
   return escapeHtml(str);
 }
 
-/** 图片 URL 安全校验 — 仅允许 http/https 和本地生成的 base64 图片 */
+/** 图片 URL 安全校验 - 仅允许 http/https 和本地生成的 base64 图片 */
 function sanitizeImageUrl(url) {
   if (!url) return '';
   const trimmed = String(url).trim();
@@ -42,7 +42,7 @@ function sanitizeImageUrl(url) {
   }
 }
 
-/** 防抖函数 — 延迟执行，合并高频调用 */
+/** 防抖函数 - 延迟执行，合并高频调用 */
 function debounce(fn, delay) {
   let timer = null;
   return function (...args) {
@@ -51,7 +51,7 @@ function debounce(fn, delay) {
   };
 }
 
-/** Canvas 图片压缩 — 生成预览缩略图，保留原图用于下载 */
+/** Canvas 图片压缩 - 生成预览缩略图，保留原图用于下载 */
 function compressImage(base64, maxWidth = 1200, quality = 0.7) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -85,14 +85,93 @@ function getImageOriginal(img) {
   return sanitizeImageUrl(img && (img.original || img.thumb) || '');
 }
 
-/** 通用 Modal 切换 */
+const modalFocusOrigins = new Map();
+
+function modalFocusables(modal) {
+  return Array.from(modal.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )).filter(function (element) {
+    return !element.hasAttribute('hidden') && element.getClientRects().length > 0;
+  });
+}
+
+function closeModalFromKeyboard(modalId) {
+  if (modalId === 'adminAuthModal') return closeAdminAuthModal();
+  if (modalId === 'publishModal') return closePublishModal();
+  if (modalId === 'editArticleModal') return closeEditArticleModal();
+  if (modalId === 'articleModal') return closeArticleModal();
+  if (modalId === 'visitorDetailModal') return closeVisitorDetailModal();
+  toggleModal(modalId, false);
+}
+
+/** 通用 Modal 切换，包含 inert、焦点归还和键盘约束。 */
 function toggleModal(modalId, show) {
   const modal = document.getElementById(modalId);
-  if (modal) {
-    if (show) modal.classList.add('active');
-    else modal.classList.remove('active');
+  if (!modal) return;
+
+  if (show) {
+    const current = document.querySelector('.modal-overlay.active');
+    if (current && current !== modal) toggleModal(current.id, false);
+
+    if (document.activeElement instanceof HTMLElement) {
+      modalFocusOrigins.set(modalId, document.activeElement);
+    }
+    modal.inert = false;
+    modal.removeAttribute('inert');
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+
+    window.requestAnimationFrame(function () {
+      const initial = modal.querySelector(
+        'input:not([disabled]):not([type="hidden"]):not([type="file"]), textarea:not([disabled]), select:not([disabled])'
+      ) || modal.querySelector('button:not([disabled]), a[href]');
+      (initial || modal).focus({ preventScroll: true });
+    });
+    return;
+  }
+
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  modal.inert = true;
+  modal.setAttribute('inert', '');
+  document.body.classList.toggle('modal-open', Boolean(document.querySelector('.modal-overlay.active')));
+
+  const origin = modalFocusOrigins.get(modalId);
+  modalFocusOrigins.delete(modalId);
+  if (origin && origin.isConnected) {
+    window.requestAnimationFrame(function () { origin.focus({ preventScroll: true }); });
   }
 }
+
+document.addEventListener('keydown', function (event) {
+  const modal = document.querySelector('.modal-overlay.active');
+  if (!modal) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeModalFromKeyboard(modal.id);
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+  const focusables = modalFocusables(modal);
+  if (focusables.length === 0) {
+    event.preventDefault();
+    modal.focus();
+    return;
+  }
+
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+    event.preventDefault();
+    first.focus();
+  }
+});
 
 function updateThemeToggleButton(theme) {
   var btn = document.getElementById('themeToggleBtn');
@@ -103,13 +182,15 @@ function updateThemeToggleButton(theme) {
   btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
   btn.setAttribute('title', '切换到' + nextLabel + '模式');
   btn.innerHTML = isDark
-    ? '<span>☀️</span><span>浅色</span>'
-    : '<span>🌙</span><span>深色</span>';
+    ? '<span class="theme-symbol" aria-hidden="true">◑</span><span class="theme-label">浅色</span>'
+    : '<span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label">深色</span>';
 }
 
 function applyTheme(theme) {
   var resolvedTheme = theme === 'dark' ? 'dark' : 'light';
   document.documentElement.dataset.theme = resolvedTheme;
+  var themeMeta = document.getElementById('themeColorMeta');
+  if (themeMeta) themeMeta.setAttribute('content', resolvedTheme === 'dark' ? '#0d1014' : '#e9ebee');
   updateThemeToggleButton(resolvedTheme);
 }
 
@@ -141,8 +222,82 @@ function initThemeToggle() {
   btn.addEventListener('click', toggleTheme);
 }
 
+function setupMotionReveals() {
+  var elements = Array.from(document.querySelectorAll('.motion-reveal'));
+  if (!('IntersectionObserver' in window) || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    elements.forEach(function (element) { element.classList.add('is-visible'); });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.14 });
+
+  elements.forEach(function (element) { observer.observe(element); });
+}
+
+function formatCompactCount(value) {
+  var number = Number(value) || 0;
+  return new Intl.NumberFormat('zh-CN', {
+    notation: number >= 10000 ? 'compact' : 'standard',
+    maximumFractionDigits: 1,
+  }).format(number);
+}
+
+function setProfileImage(element, value, markLoaded) {
+  if (!element) return;
+  var safe = sanitizeImageUrl(value);
+  if (!safe) return;
+  if (markLoaded) {
+    element.addEventListener('load', function () { element.classList.add('is-loaded'); }, { once: true });
+  }
+  element.src = safe;
+}
+
+async function loadDongchediHero() {
+  var status = document.getElementById('profileHeroStatus');
+  try {
+    var response = await fetch('/api/dongchedi-profile', {
+      headers: { Accept: 'application/json' },
+    });
+    var snapshot = await response.json();
+    if (!response.ok || !snapshot || !snapshot.profile || !Array.isArray(snapshot.posts)) {
+      throw new Error('profile unavailable');
+    }
+
+    var profile = snapshot.profile;
+    var name = profile.name || '我要娶一个旅行车';
+    var nameElement = document.getElementById('profileHeroName');
+    if (nameElement) nameElement.textContent = name;
+    if (status) status.textContent = '真实主页，每日同步';
+
+    var avatar = document.getElementById('profileHeroAvatar');
+    if (avatar) avatar.alt = name + '的头像';
+    setProfileImage(avatar, profile.avatarUrl, false);
+    var heroPost = snapshot.posts.find(function (post) {
+      return post && Array.isArray(post.images) && post.images.length > 0;
+    });
+    var heroImage = heroPost && heroPost.images[0];
+    var heroCoverUrl = heroImage && (heroImage.url || heroImage) || profile.coverUrl;
+    var heroCover = document.getElementById('profileHeroCover');
+    if (heroCover && heroPost) heroCover.alt = '最新动态配图：' + String(heroPost.title || name);
+    setProfileImage(heroCover, heroCoverUrl, true);
+
+    var archiveCount = document.getElementById('heroArchiveCount');
+    var followerCount = document.getElementById('heroFollowerCount');
+    if (archiveCount) archiveCount.textContent = formatCompactCount(snapshot.posts.length);
+    if (followerCount) followerCount.textContent = formatCompactCount(profile.followers);
+  } catch {
+    if (status) status.textContent = '真实主页暂时离线';
+  }
+}
+
 // ==========================================
-// APP STATE NAMESPACE — 收敛全局变量
+// APP STATE NAMESPACE - 收敛全局变量
 // ==========================================
 const App = {
   supabaseClient: null,
@@ -160,7 +315,7 @@ const App = {
   postsData: [
     {
       id: 1,
-      title: '🚀 [系统公告] SW-nb 个人全栈门户与云端实时动态发布上线！',
+      title: '[系统公告] SW-nb 个人全栈门户与云端实时动态发布上线！',
       topic: '#全站公告',
       snippet: '欢迎来到 SW-nb 全新门户！本站已成功接入 Supabase 云端数据库，支持全网实时动态发布、单 IP 每日发帖频控防刷保护，支持批量传图与剪切板直接粘贴图片！',
       time: '时间未知',
@@ -176,7 +331,7 @@ const App = {
 };
 
 // ==========================================
-// IMAGE MANAGER — 统一管理发布/编辑的多图状态
+// IMAGE MANAGER - 统一管理发布/编辑的多图状态
 // ==========================================
 const ImageManager = {
   // 每张图存储为 { thumb: '压缩预览', original: '下载图' }
@@ -379,7 +534,10 @@ function setAdminUnlockState(pass) {
   App.adminPassword = pass;
   App.isAdminUnlocked = true;
   const adminNav = document.getElementById('navAdminItem');
-  if (adminNav) adminNav.style.display = 'flex';
+  if (adminNav) {
+    adminNav.hidden = false;
+    adminNav.style.removeProperty('display');
+  }
 }
 
 function clearAdminUnlockState() {
@@ -423,9 +581,9 @@ function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = 'custom-toast ' + type;
-  const icon = type === 'error' ? '⚠️' : '✨';
+  const icon = type === 'error' ? '!' : '✓';
   toast.innerHTML =
-    '<span style="font-size:18px;">' + icon + '</span>' +
+    '<span aria-hidden="true">' + icon + '</span>' +
     '<span>' + escapeHtml(message) + '</span>';
 
   container.appendChild(toast);
@@ -555,7 +713,7 @@ function recordVisitorAction(actionText) {
 }
 
 function resetVisitorStats() {
-  if (!confirm('⚠️ 确定要清空当前所有访客统计 Hits 与访客记录数据吗？清空后将完全从 0 重新统计！')) return;
+  if (!confirm('确定要清空当前所有访客统计 Hits 与访客记录数据吗？清空后将完全从 0 重新统计。')) return;
   removeStoredValue('swnb_visitor_logs', '访客日志清理失败');
   setStoredValue('swnb_total_hits', '0', 'Hits 归零写入失败');
   showToast('所有访客统计数据已成功归零！', 'success');
@@ -588,12 +746,12 @@ function openVisitorDetailModal(logId) {
   if (container) {
     container.innerHTML =
       '<div class="visitor-info-card">' +
-        '<div style="margin-bottom:8px;"><strong>🌐 访客标识 / IP:</strong> <span style="color:var(--primary); font-weight:700;">' + escapeHtml(log.ip) + '</span></div>' +
-        '<div style="margin-bottom:8px;"><strong>⏱️ 累计停留时长:</strong> <strong style="color:#10b981; font-size:16px;">' + escapeHtml(stayFormatted) + '</strong></div>' +
-        '<div style="margin-bottom:8px;"><strong>🖥️ 屏幕与时间:</strong> ' + escapeHtml(log.screen) + ' · 首次访问 ' + escapeHtml(log.timeStr) + '</div>' +
+        '<div style="margin-bottom:8px;"><strong>访客标识 / IP:</strong> <span style="color:var(--accent); font-weight:700;">' + escapeHtml(log.ip) + '</span></div>' +
+        '<div style="margin-bottom:8px;"><strong>累计停留时长:</strong> <strong style="color:var(--success); font-size:16px;">' + escapeHtml(stayFormatted) + '</strong></div>' +
+        '<div style="margin-bottom:8px;"><strong>屏幕与时间:</strong> ' + escapeHtml(log.screen) + ' / 首次访问 ' + escapeHtml(log.timeStr) + '</div>' +
         '<div style="font-size:12.5px; color:var(--text-muted); word-break:break-all;"><strong>浏览器环境:</strong> ' + escapeHtml(log.ua) + '</div>' +
       '</div>' +
-      '<h4 style="font-size:15px; font-weight:800; margin-bottom:14px; color:var(--text-main);">📌 访客点击与浏览明细轨迹 (' + actions.length + ' 次动作)</h4>' +
+      '<h4 style="font-size:15px; font-weight:800; margin-bottom:14px; color:var(--text-main);">访客点击与浏览明细轨迹 (' + actions.length + ' 次动作)</h4>' +
       '<div class="visitor-timeline">' +
         actions.map(function (act) {
           return '<div class="timeline-item">' +
@@ -745,42 +903,60 @@ function renderPostList() {
   var container = document.getElementById('postListContainer');
   if (!container) return;
 
+  var heroPostCount = document.getElementById('heroPostCount');
+  if (heroPostCount) heroPostCount.textContent = String(App.postsData.length || 0);
+
   if (App.postsData.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:80px 0;color:var(--text-muted);font-size:16px;">暂无相关文章</div>';
+    container.innerHTML = '<div class="post-empty-state"><strong>这里还没有文章</strong><span>发布第一篇内容后，它会出现在这里。</span></div>';
     return;
   }
 
   var fragment = document.createDocumentFragment();
 
-  App.postsData.forEach(function (post) {
+  App.postsData.forEach(function (post, index) {
     var article = document.createElement('article');
-    article.className = 'post-card';
+    var classNames = ['post-card'];
+    var cycle = index % 6;
+    if (cycle === 0 && post.images && post.images.length > 0) classNames.push('post-card--feature');
+    else if (cycle >= 3) classNames.push('post-card--compact');
+    article.className = classNames.join(' ');
+    article.style.setProperty('--post-index', String(index));
+    article.tabIndex = 0;
+    article.setAttribute('role', 'button');
+    article.setAttribute('aria-label', '阅读文章：' + String(post.title || '无标题文章'));
     article.onclick = function () { openArticleModal(post.id); };
+    article.onkeydown = function (event) {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openArticleModal(post.id);
+    };
 
     var imagesHtml = '';
     if (post.images && post.images.length > 0) {
-      var imgTags = post.images.map(function (img) {
+      var imgTags = post.images.slice(0, 4).map(function (img) {
         var thumbUrl = getImageThumb(img);
         return thumbUrl
-          ? '<img src="' + escapeAttribute(thumbUrl) + '" class="post-img" alt="配图" loading="lazy">'
+          ? '<img src="' + escapeAttribute(thumbUrl) + '" class="post-img" alt="' + escapeAttribute(post.title || '文章配图') + '" loading="lazy" decoding="async">'
           : '';
-      }).filter(Boolean).join('');
-      if (imgTags) {
-        imagesHtml = '<div class="post-images-grid">' + imgTags + '</div>';
+      }).filter(Boolean);
+      if (imgTags.length > 0) {
+        imagesHtml = '<div class="post-images-grid" data-count="' + imgTags.length + '">' + imgTags.join('') + '</div>';
       }
     }
 
     article.innerHTML =
-      '<div class="post-card-header">' +
-        '<span class="topic-tag">' + escapeHtml(post.topic) + '</span>' +
-        '<span class="post-time">📅 ' + escapeHtml(getPostDisplayTime(post)) + '</span>' +
+      '<div class="post-content-wrap">' +
+        '<div class="post-card-header">' +
+          '<span class="topic-tag">' + escapeHtml(post.topic) + '</span>' +
+          '<time class="post-time">' + escapeHtml(getPostDisplayTime(post)) + '</time>' +
+        '</div>' +
+        '<h3 class="post-title">' + escapeHtml(post.title) + '</h3>' +
+        '<div class="post-snippet">' + escapeHtml(post.snippet) + '</div>' +
+        '<div class="post-footer">' +
+          '<span class="post-views-badge">阅读 ' + (post.views || 0) + '</span>' +
+        '</div>' +
       '</div>' +
-      '<h3 class="post-title">' + escapeHtml(post.title) + '</h3>' +
-      '<div class="post-snippet">' + escapeHtml(post.snippet) + '</div>' +
-      imagesHtml +
-      '<div class="post-footer">' +
-        '<span class="post-views-badge">👁️ ' + (post.views || 0) + ' 次阅读</span>' +
-      '</div>';
+      imagesHtml;
 
     fragment.appendChild(article);
   });
@@ -813,20 +989,14 @@ function switchProject(viewName, el) {
     if (blogView) blogView.style.display = 'none';
     if (adminView) adminView.classList.remove('active');
     if (iframeView) iframeView.classList.add('active');
-    if (titleEl) titleEl.innerHTML = '<span>📱</span> My bro-phone';
+    if (titleEl) titleEl.textContent = 'My bro-phone';
     if (iframeEl && iframeEl.getAttribute('src') !== 'bro-phone/index.html') {
       iframeEl.setAttribute('src', 'bro-phone/index.html');
     }
     recordVisitorAction('点击预览 bro-phone 演示');
   } else if (viewName === 'dongchedi') {
-    if (blogView) blogView.style.display = 'none';
-    if (adminView) adminView.classList.remove('active');
-    if (iframeView) iframeView.classList.add('active');
-    if (titleEl) titleEl.innerHTML = '<span>🚘</span> 我的主页（？';
-    if (iframeEl && iframeEl.getAttribute('src') !== 'dongchedi-user/index.html') {
-      iframeEl.setAttribute('src', 'dongchedi-user/index.html');
-    }
-    recordVisitorAction('点击预览懂车帝复刻页');
+    recordVisitorAction('打开真实懂车帝动态归档');
+    window.location.href = 'dongchedi-user/';
   } else if (viewName === 'admin') {
     if (!App.isAdminUnlocked) {
       openAdminAuthModal();
@@ -853,12 +1023,12 @@ function closeAdminAuthModal() {
   toggleModal('adminAuthModal', false);
 }
 
-/** 管理员密码验证 — 交由 Supabase Edge Function 在服务端校验 */
+/** 管理员密码验证 - 交由 Supabase Edge Function 在服务端校验 */
 async function verifyAdminAuth() {
   var pass = document.getElementById('adminPassInput').value.trim();
   if (!pass) {
     var blankErr = document.getElementById('adminErrorMsg');
-    blankErr.textContent = '❌ 请输入管理员密码';
+    blankErr.textContent = '请输入管理员密码';
     blankErr.style.display = 'block';
     return;
   }
@@ -878,7 +1048,7 @@ async function verifyAdminAuth() {
       }
     } else {
       var err = document.getElementById('adminErrorMsg');
-      err.textContent = '❌ 管理员密码错误';
+      err.textContent = '管理员密码错误';
       err.style.display = 'block';
     }
   } catch (e) {
@@ -910,13 +1080,13 @@ function refreshAdminConsoleData() {
         var stayBadge = stayMin > 0 ? stayMin + '分' + staySec + '秒' : staySec + '秒';
         var actCount = (l.actions && l.actions.length) || 1;
         return '<tr class="visitor-clickable-row" onclick="openVisitorDetailModal(' + l.id + ')" title="点击查看访客 ' + escapeHtml(l.ip) + ' 的全部点击与停留轨迹">' +
-          '<td><strong style="color:var(--primary);">' + escapeHtml(l.ip) + '</strong></td>' +
+          '<td><strong style="color:var(--accent);">' + escapeHtml(l.ip) + '</strong></td>' +
           '<td>' +
             '<div>' + escapeHtml(l.page) + '</div>' +
-            '<div style="font-size:11.5px;color:#10b981;font-weight:700;">⏱️ 停留: ' + escapeHtml(stayBadge) + ' (' + actCount + ' 次点击)</div>' +
+            '<div style="font-size:11.5px;color:var(--success);font-weight:700;">停留: ' + escapeHtml(stayBadge) + ' (' + actCount + ' 次点击)</div>' +
           '</td>' +
           '<td style="font-size:12px;color:var(--text-muted);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(l.ua) + '</td>' +
-          '<td>🕒 ' + escapeHtml(l.timeStr) + '</td>' +
+          '<td>' + escapeHtml(l.timeStr) + '</td>' +
           '<td onclick="event.stopPropagation()">' +
             '<button class="btn-sm btn-del" onclick="deleteVisitorLog(' + l.id + ', event)">删除</button>' +
           '</td>' +
@@ -941,7 +1111,7 @@ function renderAdminArticleTable() {
     return '<tr>' +
       '<td><strong>#' + post.id + '</strong></td>' +
       '<td><span style="color:var(--text-main);font-weight:700;">' + escapeHtml(post.title) + '</span> <span class="topic-tag" style="margin-left:6px;font-size:11px;">' + escapeHtml(post.topic) + '</span></td>' +
-      '<td>👁️ ' + (post.views || 0) + '</td>' +
+      '<td>' + (post.views || 0) + '</td>' +
       '<td>' +
         '<button class="btn-sm btn-edit" onclick="openEditArticleModal(' + post.id + ')">修改</button>' +
         '<button class="btn-sm btn-del" onclick="deleteArticle(' + post.id + ')">删除</button>' +
@@ -951,7 +1121,7 @@ function renderAdminArticleTable() {
 }
 
 async function deleteArticle(id) {
-  if (!confirm('⚠️ 确认删除文章 #' + id + ' 吗？删除后不可恢复！')) return;
+  if (!confirm('确认删除文章 #' + id + ' 吗？删除后不可恢复。')) return;
   if (!ensureAdminSession()) return;
 
   try {
@@ -1129,7 +1299,7 @@ async function submitNewArticle() {
   persistPostsCache(true);
 
   closePublishModal();
-  showToast('🚀 文章发布成功！', 'success');
+  showToast('文章发布成功。', 'success');
   recordVisitorAction('发布新文章: ' + title);
   renderPostList();
   renderAdminArticleTable();
@@ -1139,7 +1309,7 @@ async function submitNewArticle() {
 // ARTICLE DETAIL & VIEW COUNTER
 // ==========================================
 
-/** 下载图片 — 带 URL 安全校验 */
+/** 下载图片 - 带 URL 安全校验 */
 function downloadImage(url, filename) {
   var safeUrl = sanitizeImageUrl(url);
   if (!safeUrl) {
@@ -1170,7 +1340,7 @@ function downloadImage(url, filename) {
     });
 }
 
-/** 按文章ID和图片索引下载原始高清图 — 避免在 onclick 属性中放入超长 base64 */
+/** 按文章ID和图片索引下载原始高清图 - 避免在 onclick 属性中放入超长 base64 */
 function downloadArticleImage(postId, imageIndex) {
   var post = App.postsData.find(function (p) { return p.id === postId; });
   if (!post || !post.images || !post.images[imageIndex]) return;
@@ -1236,9 +1406,9 @@ function openArticleModal(id, options) {
     '<div style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">' +
       '<div>' +
         '<span class="topic-tag">' + escapeHtml(post.topic) + '</span>' +
-        '<span style="font-size:13px; color:var(--text-muted); margin-left:12px;">📅 ' + escapeHtml(getPostDisplayTime(post)) + '</span>' +
+        '<span style="font-size:13px; color:var(--text-muted); margin-left:12px;">' + escapeHtml(getPostDisplayTime(post)) + '</span>' +
       '</div>' +
-      '<span class="post-views-badge">👁️ ' + post.views + ' 次浏览</span>' +
+      '<span class="post-views-badge">阅读 ' + post.views + '</span>' +
     '</div>' +
     '<h2 style="font-size:26px; font-weight:800; color:var(--text-main); margin-bottom:24px; line-height:1.4;">' + escapeHtml(post.title) + '</h2>' +
     '<div class="article-content-full">' + post.fullContent + '</div>' +
@@ -1260,8 +1430,10 @@ function closeArticleModal() {
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
   initThemeToggle();
+  setupMotionReveals();
   initSupabase();
   initVisitorTracking();
+  loadDongchediHero();
   loadPosts();
   setInterval(refreshRelativePostTimes, 60000);
 });

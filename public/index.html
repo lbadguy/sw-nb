@@ -4,8 +4,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SW-nb Website</title>
-  <meta name="description" content="SW-nb Website. Personal blog for SW-nb.">
+  <meta id="themeColorMeta" name="theme-color" content="#e9ebee">
+  <script>
+    (function () {
+      var theme = 'light';
+      try {
+        var stored = window.localStorage.getItem('swnb_theme');
+        theme = stored === 'dark' || stored === 'light'
+          ? stored
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      } catch (error) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.dataset.theme = theme;
+      document.getElementById('themeColorMeta').setAttribute('content', theme === 'dark' ? '#0d1014' : '#e9ebee');
+    }());
+  </script>
+  <title>SW-nb | 我要娶一个旅行车</title>
+  <meta name="description" content="SW-nb 的个人博客，收录汽车、旅行与偶尔跑偏的生活记录。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SW-nb | 我要娶一个旅行车">
+  <meta property="og:description" content="汽车、旅行与生活记录。">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="design-system.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
   <script src="shared-browser-utils.js"></script>
@@ -13,116 +34,116 @@
 
 <body>
 
-  <!-- Top Frosted Glass Header -->
-  <header class="top-header">
-    <a href="#" class="brand-logo" ondblclick="openAdminAuthModal()">
-      SW-nb
+  <header class="top-header liquid-glass">
+    <a href="#blogMainView" class="brand-logo" ondblclick="openAdminAuthModal()" aria-label="SW-nb 首页">
+      <span class="brand-mark" aria-hidden="true">SW</span>
+      <span>SW-nb</span>
     </a>
 
     <div class="header-actions">
-      <button id="themeToggleBtn" class="btn-theme-toggle" type="button" aria-pressed="false"
-        title="切换主题">
-        <span>🌙</span>
-        <span>深色</span>
+      <button id="themeToggleBtn" class="theme-toggle" type="button" aria-pressed="false" title="切换主题">
+        <span class="theme-symbol" aria-hidden="true">◐</span>
+        <span class="theme-label">深色</span>
       </button>
 
-      <button class="btn-publish" onclick="openPublishModal()">
-        <span>✨</span>
-        <span>发布新文章</span>
+      <button class="btn-publish button-primary" onclick="openPublishModal()">
+        <span>发布文章</span>
       </button>
     </div>
   </header>
 
-  <!-- Left Floating Glass Sidebar Navigation -->
-  <aside class="sidebar">
-    <ul class="sidebar-menu">
-      <li id="navBlogItem" class="sidebar-item active" onclick="switchProject('blog', this)">
-        <span class="sidebar-icon">🏠</span>
+  <aside class="sidebar liquid-glass" aria-label="项目导航">
+    <nav class="sidebar-menu">
+      <button id="navBlogItem" class="sidebar-item active" type="button" onclick="switchProject('blog', this)">
+        <span class="sidebar-index" aria-hidden="true">A</span>
         <span>博客动态</span>
-      </li>
-      <li class="sidebar-item" onclick="switchProject('phone', this)">
-        <span class="sidebar-icon">📱</span>
-        <span>My SW-NB 15 Pro Max</span>
-      </li>
-      <li class="sidebar-item" onclick="switchProject('dongchedi', this)">
-        <span class="sidebar-icon">🚘</span>
+      </button>
+      <button class="sidebar-item" type="button" onclick="switchProject('phone', this)">
+        <span class="sidebar-index" aria-hidden="true">B</span>
+        <span>SW-NB 15 Pro Max</span>
+      </button>
+      <a class="sidebar-item" href="dongchedi-user/">
+        <span class="sidebar-index" aria-hidden="true">C</span>
         <span>我的主页（？</span>
-      </li>
-      <li id="navAdminItem" class="sidebar-item" style="display:none;" onclick="switchProject('admin', this)">
-        <span class="sidebar-icon">⚙️</span>
+      </a>
+      <button id="navAdminItem" class="sidebar-item" type="button" hidden onclick="switchProject('admin', this)">
+        <span class="sidebar-index" aria-hidden="true">D</span>
         <span>管理控制台</span>
-      </li>
-    </ul>
+      </button>
+    </nav>
 
     <div class="sidebar-footer">
       <a href="https://www.dongchedi.com/user/485359118462679" target="_blank" rel="noopener noreferrer"
         class="btn-external-home">
-        <span>🏎️</span> <span>我 的 主 页</span>
+        <span>懂车帝原页</span>
       </a>
-      <div
-        style="font-size:12px; color:var(--text-muted); text-align:center; padding-top:14px; border-top:1px solid rgba(226,232,240,0.6);">
-        © 2026 SW-nb Website
-        <br>
-        <a href="https://lc7c.dpdns.org" target="_blank" rel="noopener noreferrer"
-          style="color:var(--text-sub); font-weight:600; text-decoration:underline;">Created by LC7c</a>
-      </div>
+      <p>© 2026 SW-nb</p>
+      <a class="creator-link" href="https://lc7c.dpdns.org" target="_blank" rel="noopener noreferrer">Created by LC7c</a>
     </div>
   </aside>
 
-  <!-- Main Portal Layout -->
   <main class="main-wrapper">
-
-    <!-- 1. Blog Main View -->
     <div id="blogMainView">
-      <section class="hero-card">
-        <div class="hero-left">
-          <div class="avatar-wrapper">
-            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&auto=format&fit=crop&q=80"
-              class="avatar-img" alt="博主头像">
-            <div class="status-indicator" title="云端在线同步中"></div>
-          </div>
-          <div class="hero-meta">
-            <h1 class="hero-title">我要娶一个旅行车</h1>
-            <p class="hero-subtitle">简介：这个人很懒，什么都没写~</p>
+      <section class="hero-card liquid-glass motion-reveal" aria-labelledby="homeTitle">
+        <div class="hero-copy">
+          <p class="hero-eyebrow">PERSONAL NOTEBOOK</p>
+          <h1 id="homeTitle">我要娶一个 <span>旅行车</span></h1>
+          <p class="hero-subtitle">写车、写路，也写偶尔跑偏的生活。</p>
+          <div class="hero-actions">
+            <a class="button-primary" href="dongchedi-user/">打开动态归档</a>
           </div>
         </div>
 
-        <div class="hero-stats">
-          <div class="stat-box">
-            <span class="stat-val">3</span>
-            <span class="stat-txt">收录</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-val">5次/天</span>
-            <span class="stat-txt">答斐济</span>
+        <div class="hero-visual" aria-label="懂车帝个人资料预览">
+          <img id="profileHeroCover" class="hero-cover-image" alt="我要娶一个旅行车的懂车帝主页封面"
+            decoding="async" referrerpolicy="no-referrer">
+          <div class="hero-visual-shade"></div>
+          <div class="hero-profile-chip liquid-glass">
+            <img id="profileHeroAvatar" class="hero-avatar" alt="我要娶一个旅行车的头像" width="58" height="58"
+              decoding="async" referrerpolicy="no-referrer">
+            <div>
+              <strong id="profileHeroName">我要娶一个旅行车</strong>
+              <span id="profileHeroStatus">正在读取真实主页</span>
+            </div>
           </div>
         </div>
+
+        <dl class="hero-stats">
+          <div><dt>博客文章</dt><dd id="heroPostCount">-</dd></div>
+          <div><dt>公开动态</dt><dd id="heroArchiveCount">-</dd></div>
+          <div><dt>懂车帝粉丝</dt><dd id="heroFollowerCount">-</dd></div>
+        </dl>
       </section>
 
-      <!-- Articles List -->
+      <header class="journal-heading motion-reveal">
+        <h2>最近写下</h2>
+        <p>博客文章保留完整正文与原图。最新内容会优先显示。</p>
+      </header>
+
       <section id="postListContainer" class="post-list">
-        <!-- Dynamically rendered by app.js -->
+        <div class="post-list-skeleton" aria-label="正在读取博客文章">
+          <span></span><span></span><span></span>
+        </div>
       </section>
     </div>
 
-    <!-- 2. Internal Subproject Viewer (Iframe Portal) -->
     <div id="subprojectViewer" class="subproject-viewer">
-      <div class="subproject-bar">
+      <div class="subproject-bar liquid-glass">
         <div id="subprojectTitle" class="subproject-title">
-          <span>📱</span> 正在预览项目
+          正在预览项目
         </div>
-        <button class="btn-back-home" onclick="switchProject('blog', document.getElementById('navBlogItem'))">
-          ← 返回博客动态
+        <button class="button-quiet btn-back-home" onclick="switchProject('blog', document.getElementById('navBlogItem'))">
+          返回博客动态
         </button>
       </div>
-      <iframe id="subprojectIframe" class="subproject-iframe" src=""></iframe>
+      <iframe id="subprojectIframe" class="subproject-iframe" src="" title="项目预览"></iframe>
     </div>
 
     <!-- 3. Admin Management Console View (Visitor Analytics & Article CRUD) -->
     <div id="adminConsoleView" class="admin-console-view">
       <div class="subproject-bar">
         <div class="subproject-title">
-          <span>⚙️</span> SW-nb 访客控制台与文章全权管理后台
+          SW-nb 访客控制台与文章管理后台
         </div>
         <div style="display:flex; gap:10px;">
           <button class="btn-back-home" onclick="switchProject('blog', document.getElementById('navBlogItem'))">
@@ -134,22 +155,22 @@
       <!-- Visitor Summary Stats Grid -->
       <section class="summary-grid">
         <article class="summary-card">
-          <span class="summary-label">👁️ 唯一 Views</span>
+          <span class="summary-label">唯一 Views</span>
           <strong id="adminStatUniqueViews" class="summary-num">0</strong>
           <span class="summary-desc">本设备记录的访问次数</span>
         </article>
         <article class="summary-card">
-          <span class="summary-label">⚡ 总访问 Hits</span>
+          <span class="summary-label">总访问 Hits</span>
           <strong id="adminStatTotalHits" class="summary-num">0</strong>
           <span class="summary-desc">页面请求频次</span>
         </article>
         <article class="summary-card">
-          <span class="summary-label">🌐 监测访客 IP 数</span>
+          <span class="summary-label">监测访客 IP 数</span>
           <strong id="adminStatUniqueIps" class="summary-num">0</strong>
           <span class="summary-desc">已识别公网 IP 数</span>
         </article>
         <article class="summary-card">
-          <span class="summary-label">📋 明细记录数</span>
+          <span class="summary-label">明细记录数</span>
           <strong id="adminStatLogCount" class="summary-num">0</strong>
           <span class="summary-desc">系统存储的访问日志</span>
         </article>
@@ -159,7 +180,7 @@
       <section class="admin-section-card">
         <div class="admin-section-head">
           <div class="admin-section-title">
-            <span>📚</span> 博客文章全权管理 (支持修改与删除)
+            博客文章管理 (支持修改与删除)
           </div>
           <button class="btn-publish" style="padding:6px 18px;font-size:13px;" onclick="openPublishModal()">+
             新增文章</button>
@@ -185,9 +206,9 @@
       <section class="admin-section-card">
         <div class="admin-section-head">
           <div class="admin-section-title">
-            <span>🛰️</span> 近期访客明细列表
+            近期访客明细列表
           </div>
-          <button class="btn-back-home" onclick="refreshAdminConsoleData()">🔄 刷新访客数据</button>
+          <button class="btn-back-home" onclick="refreshAdminConsoleData()">刷新访客数据</button>
         </div>
         <div class="admin-table-wrapper">
           <table class="admin-table">
@@ -211,11 +232,12 @@
   </main>
 
   <!-- 1. Admin Authentication Modal -->
-  <div id="adminAuthModal" class="modal-overlay" onclick="closeAdminAuthModal()">
+  <div id="adminAuthModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="adminAuthModalTitle" tabindex="-1" inert onclick="closeAdminAuthModal()">
     <div class="modal-card" style="max-width: 380px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">🛡️ 管理端登录校验</span>
-        <button class="btn-close" onclick="closeAdminAuthModal()">✕</button>
+        <span id="adminAuthModalTitle" class="modal-title">管理端登录校验</span>
+        <button class="btn-close" type="button" aria-label="关闭管理端登录" onclick="closeAdminAuthModal()">✕</button>
       </div>
       <div class="modal-body">
         <p style="font-size:14px; color:var(--text-sub); margin-bottom:18px;">
@@ -226,7 +248,7 @@
             style="text-align:center; letter-spacing:6px; font-size:20px; font-weight:800;"
             onkeydown="if(event.key==='Enter') verifyAdminAuth()">
           <div id="adminErrorMsg"
-            style="color:#ec4899; font-size:13px; font-weight:600; margin-top:10px; display:none;"></div>
+            style="color:var(--danger); font-size:13px; font-weight:600; margin-top:10px; display:none;"></div>
         </div>
         <button class="btn-submit" onclick="verifyAdminAuth()">解锁进入控制台</button>
       </div>
@@ -234,11 +256,12 @@
   </div>
 
   <!-- 2. Publish New Article Modal (Supports Multi-Image Upload & Grid Preview) -->
-  <div id="publishModal" class="modal-overlay" onclick="closePublishModal()">
+  <div id="publishModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="publishModalTitle" tabindex="-1" inert onclick="closePublishModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">✍️ 发布全新博客动态</span>
-        <button class="btn-close" onclick="closePublishModal()">✕</button>
+        <span id="publishModalTitle" class="modal-title">发布全新博客动态</span>
+        <button class="btn-close" type="button" aria-label="关闭发布文章" onclick="closePublishModal()">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -254,7 +277,7 @@
           <input type="file" id="pubImgFile" accept="image/*" multiple class="file-input-hidden"
             onchange="handleMultiImageSelection(this, 'pubImgPreviewGrid', false)">
           <label for="pubImgFile" class="file-upload-label">
-            <span class="upload-icon">📷</span>
+            <span class="upload-icon" aria-hidden="true">+</span>
             <span class="upload-text">点击或框选批量多张照片</span>
           </label>
           <!-- 实时多图预览宫格 -->
@@ -268,17 +291,18 @@
           <label class="form-label">正文故事 / 深度探讨</label>
           <textarea id="pubContent" class="form-textarea" placeholder="写下想要分享的见解..."></textarea>
         </div>
-        <button id="publishSubmitBtn" class="btn-submit" onclick="submitNewArticle()">🚀 发布</button>
+        <button id="publishSubmitBtn" class="btn-submit" onclick="submitNewArticle()">发布</button>
       </div>
     </div>
   </div>
 
   <!-- 3. Edit Article Modal (Supports Multi-Image Upload & Grid Preview) -->
-  <div id="editArticleModal" class="modal-overlay" onclick="closeEditArticleModal()">
+  <div id="editArticleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="editArticleModalTitle" tabindex="-1" inert onclick="closeEditArticleModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">✏️ 修改编辑博客文章</span>
-        <button class="btn-close" onclick="closeEditArticleModal()">✕</button>
+        <span id="editArticleModalTitle" class="modal-title">修改博客文章</span>
+        <button class="btn-close" type="button" aria-label="关闭文章编辑" onclick="closeEditArticleModal()">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -294,7 +318,7 @@
           <input type="file" id="editImgFile" accept="image/*" multiple class="file-input-hidden"
             onchange="handleMultiImageSelection(this, 'editImgPreviewGrid', true)">
           <label for="editImgFile" class="file-upload-label" style="padding:16px;">
-            <span class="upload-icon">📷</span>
+            <span class="upload-icon" aria-hidden="true">+</span>
             <span class="upload-text">点击批量挑选或补充图片</span>
           </label>
           <div id="editImgPreviewGrid" class="multi-preview-grid" style="display:none;"></div>
@@ -307,17 +331,18 @@
           <label class="form-label">正文内容</label>
           <textarea id="editContent" class="form-textarea"></textarea>
         </div>
-        <button id="editSubmitBtn" class="btn-submit" onclick="saveEditedArticle()">💾 保存修改并同步云端</button>
+        <button id="editSubmitBtn" class="btn-submit" onclick="saveEditedArticle()">保存并同步</button>
       </div>
     </div>
   </div>
 
   <!-- 4. Article Detail Reader Modal -->
-  <div id="articleModal" class="modal-overlay" onclick="closeArticleModal()">
+  <div id="articleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="articleModalTitle" tabindex="-1" inert onclick="closeArticleModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">📖 博客正文</span>
-        <button class="btn-close" onclick="closeArticleModal()">✕</button>
+        <span id="articleModalTitle" class="modal-title">博客正文</span>
+        <button class="btn-close" type="button" aria-label="关闭博客正文" onclick="closeArticleModal()">✕</button>
       </div>
       <div id="articleDetailContent" class="modal-body">
         <!-- Rendered dynamically -->
@@ -326,11 +351,12 @@
   </div>
 
   <!-- 5. Visitor Detailed Analytics Modal -->
-  <div id="visitorDetailModal" class="modal-overlay" onclick="closeVisitorDetailModal()">
+  <div id="visitorDetailModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="visitorDetailModalTitle" tabindex="-1" inert onclick="closeVisitorDetailModal()">
     <div class="modal-card" style="max-width: 620px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">🛰️ 访客访问轨迹与停留数据</span>
-        <button class="btn-close" onclick="closeVisitorDetailModal()">✕</button>
+        <span id="visitorDetailModalTitle" class="modal-title">访客访问轨迹与停留数据</span>
+        <button class="btn-close" type="button" aria-label="关闭访客详情" onclick="closeVisitorDetailModal()">✕</button>
       </div>
       <div id="visitorDetailContent" class="modal-body">
         <!-- Rendered dynamically -->

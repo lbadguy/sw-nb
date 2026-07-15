@@ -2,7 +2,24 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "sw-nb",
   "main": "worker.js",
-  "compatibility_date": "2026-07-03",
+  "compatibility_date": "2026-07-14",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "DONGCHEDI_USER_ID": "485359118462679"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "DONGCHEDI_CACHE"
+    }
+  ],
+  "triggers": {
+    // 20:17 UTC = 04:17 Asia/Shanghai, once per day.
+    "crons": [
+      "17 20 * * *"
+    ]
+  },
   "observability": {
     "enabled": true
   },
