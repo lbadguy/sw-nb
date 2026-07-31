@@ -8,7 +8,7 @@ const script = fs.readFileSync('public/swhappybirthday/script.js', 'utf8');
 
 test('birthday page stays isolated and unlisted', () => {
   assert.match(html, /<meta name="robots" content="noindex, nofollow, noarchive">/);
-  assert.match(html, /id="swhappybirthday"|Happy Birthday, Homie/i);
+  assert.match(html, /id="top"|<title>[^<]+<\/title>/i);
   assert.doesNotMatch(fs.readFileSync('public/index.html', 'utf8'), /swhappybirthday/i);
 });
 

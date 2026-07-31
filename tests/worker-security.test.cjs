@@ -2,6 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
+test('npm lockfile is compatible with Cloudflare build installs', () => {
+  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+  const packages = Object.entries(lock.packages);
+  assert.ok(packages.length > 0);
+  assert.ok(packages.every(([, entry]) => typeof entry.version === 'string' && entry.version.trim().length > 0));
+  assert.ok(packages.every(([, entry]) => !String(entry.resolved || '').includes('npmmirror.com')));
+});
+
 let modulePromise;
 function loadWorkerModule() {
   if (!modulePromise) {
