@@ -1,242 +1,117 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SW-NB 15 Pro Max - 巅峰之作</title>
-    <!-- 引入 Vanilla Tilt 用于 3D 悬浮特效 -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='8' y='50' font-size='48'%3E%F0%9F%98%8E%3C/text%3E%3C/svg%3E">
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js" onload="window.initTilt && window.initTilt()"></script>
-    <link rel="stylesheet" href="style.css?v=20260321b">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SW-NB 15 Pro Max 实验性数字发布会。">
+  <title>SW-NB 15 Pro Max / Launch</title>
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../vendor/lucide.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
+  <div id="loader" class="launch-loader" aria-live="polite">
+    <div class="loader-code">SW—NB / BOOT SEQUENCE</div>
+    <div class="loader-word">PRO MAX</div>
+    <div class="loader-track"><span></span></div>
+  </div>
 
-    <!-- 开机画面 -->
-    <div id="loader">
-        <div class="glitch-loader" data-text="SYSTEM OVERRIDE">BOOTING SW-NB OS 15...</div>
-        <div class="loader-bar"><div class="loader-progress"></div></div>
-    </div>
+  <canvas id="particles" class="particle-field" aria-hidden="true"></canvas>
 
-    <!-- 背景粒子特效 (Canvas) -->
-    <canvas id="particles-js"></canvas>
-
-    <nav>
-        <div class="logo">SW-NB.</div>
-        <a href="#versions" class="buy-btn">查看版本与价格</a>
+  <header class="launch-header">
+    <a class="launch-brand" href="#hero"><span>SW</span><b>15 PRO MAX</b></a>
+    <nav aria-label="发布会导航">
+      <a href="#system">系统</a>
+      <a href="#scenes">场景</a>
+      <a href="#versions">版本</a>
     </nav>
+    <a class="header-chip" href="#versions">2026 EDITION <i data-lucide="arrow-down-right"></i></a>
+  </header>
 
-    <div class="content">
-        <!-- Hero Section -->
-        <section id="hero" style="position: relative;">
-            <div class="float-text" style="top: 5%;">FLAGSHIP</div>
-            <div class="reveal">
-                <h1 style="filter: drop-shadow(0 0 40px rgba(255,0,127,0.6));">SW-NB 15 Pro Max</h1>
-                <div class="massive-text">跨越物种的史诗级震撼。</div>
-                <p class="desc">搭载人类史上首枚量产的「沙雕」神经元仿生芯片。极致的身材，逆天的品味，这不是一台简单的设备，这是你的下半辈子。</p>
-            </div>
-            
-            <div class="reveal glass-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.5" style="transition-delay: 0.2s;">
-                <div class="hologram-effect"></div>
-                <span style="transform: translateZ(60px); filter: drop-shadow(0 0 30px rgba(255,255,255,1)); font-size: clamp(6rem, 20vw, 10rem);">😎</span>
-            </div>
-        </section>
+  <main>
+    <section id="hero" class="launch-hero">
+      <div class="launch-media"><img src="../assets/machine-detail.jpg" alt="高性能机械部件细节"></div>
+      <div class="launch-shade"></div>
+      <div class="launch-hero-copy">
+        <p class="launch-kicker">THE UNREASONABLE PERSONAL DEVICE</p>
+        <h1><span>SW-NB 15</span><span class="launch-outline">PRO MAX</span></h1>
+        <div class="launch-lead">
+          <p>不是手机。是一套把场面、记忆和高亮时刻全部接管的个人现场系统。</p>
+          <a href="#system">进入系统 <i data-lucide="arrow-down"></i></a>
+        </div>
+      </div>
+      <dl class="launch-telemetry">
+        <div><dt>CORE</dt><dd>SW-X</dd></div>
+        <div><dt>MEMORY</dt><dd>2TB</dd></div>
+        <div><dt>PEAK</dt><dd>999%</dd></div>
+        <div><dt>LATENCY</dt><dd>0.01s</dd></div>
+      </dl>
+    </section>
 
-        <!-- AF System -->
-        <section id="camera">
-            <div class="reveal" style="width: 100%;">
-                <h2 class="massive-text" style="background: var(--accent-2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">雷达级 AI 智能对焦美腿</h2>
-                <p class="desc">直接粉碎物理法则的微距追踪。覆盖方圆 500 米范围，一旦截获哪怕 1 像素的美腿信号，视网膜马达即刻在 <strong style="color: #00f2fe;">0.001 秒</strong> 内完成暴力变焦。<strong style="color: #fff;">咬死目标，永不脱靶。</strong></p>
-                
-                <div class="radar-container">
-                    <div class="radar-sweep"></div>
-                    <div class="radar-center"></div>
-                    <div class="radar-target t1"></div>
-                    <div class="radar-target t2"></div>
-                    <div class="radar-target t3"></div>
-                </div>
-            </div>
-        </section>
+    <section id="system" class="system-section">
+      <div class="system-copy reveal">
+        <p class="eyebrow">System architecture</p>
+        <h2 class="section-title">把高光时刻，<br>变成默认设置。</h2>
+      </div>
+      <div class="system-orbit reveal" data-tilt>
+        <div class="orbit-ring ring-a"></div>
+        <div class="orbit-ring ring-b"></div>
+        <div class="core-disc"><i data-lucide="cpu"></i><span>SW-CORE X</span></div>
+        <span class="orbit-label label-a">INSTANT BANTER</span>
+        <span class="orbit-label label-b">SCENE CONTROL</span>
+        <span class="orbit-label label-c">MEMORY VAULT</span>
+      </div>
+      <div class="spec-lines">
+        <article class="reveal"><span>01</span><i data-lucide="zap"></i><h3>瞬时响应</h3><p>消息还没有刷完，下一句已经进入发射序列。</p></article>
+        <article class="reveal"><span>02</span><i data-lucide="scan-face"></i><h3>主角识别</h3><p>自动判断视线、灯光和站位，把存在感重新分配。</p></article>
+        <article class="reveal"><span>03</span><i data-lucide="database-zap"></i><h3>记忆归档</h3><p>照片、语音、截图和片段，按现场情绪永久索引。</p></article>
+      </div>
+    </section>
 
-        <!-- Design -->
-        <section id="design">
-            <div class="reveal">
-                <h2 class="massive-text" style="background: var(--accent-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">人品正直，下面长直</h2>
-                <p class="desc">史无前例的航空级钛金属锻造工艺。不屈的灵魂，不弯的肉体。无论你从什么角度去挑剔，他永远是一根<strong style="color: #f7ce68;">坚不可摧、笔直向上的擎天柱。</strong></p>
-                
-                <div class="straight-pole-container">
-                    <div class="straight-pole"></div>
-                </div>
-            </div>
-        </section>
+    <section id="scenes" class="scenes-section">
+      <header class="scenes-heading reveal">
+        <p class="eyebrow">Signature scenes</p>
+        <h2 class="section-title">三种场景。<br>一套压倒性表现。</h2>
+      </header>
+      <div class="scene-strip">
+        <article class="scene scene-night reveal">
+          <img src="../assets/wagon-hero.jpg" alt="夜色中的汽车">
+          <div><span>01 / NIGHT MODE</span><h3>夜场接管</h3><p>光线越复杂，主体越明确。</p></div>
+        </article>
+        <article class="scene scene-road reveal">
+          <img src="../assets/road-story.jpg" alt="山地公路旅途">
+          <div><span>02 / ROAD MODE</span><h3>公路长镜头</h3><p>把移动中的瞬间变成完整叙事。</p></div>
+        </article>
+        <article class="scene scene-detail reveal">
+          <img src="../assets/machine-detail.jpg" alt="机械性能细节">
+          <div><span>03 / PEAK MODE</span><h3>峰值输出</h3><p>无需热身，直接进入最佳状态。</p></div>
+        </article>
+      </div>
+    </section>
 
-        <!-- Battery -->
-        <section id="battery" style="overflow-x: hidden;">
-            <div class="float-text" style="top: 30%; left: -30%; font-size: 20vw; opacity: 0.04; color: red;">DANGER</div>
-            <div class="reveal">
-                <h2 class="massive-text" style="color: #38f9d7; text-shadow: 0 0 40px rgba(56,249,215,0.6);">爆发力惊天地泣鬼神，但续航...</h2>
-                <h1 style="font-size: clamp(5rem, 15vw, 12rem); background: #ff0000; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 80px rgba(255,0,0,0.8); margin: 30px 0;">3 小时</h1>
-                <p class="desc">物理规则的代价。超维度的力量输出意味着恐怖的能耗。充电 <strong style="color: #fff;">12</strong> 小时，仅换来 <strong style="color: #ff4444;">3</strong> 小时的极致体验。<br>⚠️ <strong style="color: #ff0000;">电池亮红灯时，请立即寻找掩体倒数并撤离现场！</strong></p>
-                
-                <div class="battery-core">
-                    <div class="battery-juice"></div>
-                </div>
-            </div>
-        </section>
+    <section id="versions" class="versions-section">
+      <header class="versions-heading reveal">
+        <p class="eyebrow">Versions / 2026</p>
+        <h2 class="section-title">选择你的<br>场面控制等级。</h2>
+      </header>
+      <div class="version-list">
+        <article class="version-row reveal"><span>01</span><div><h3>SW-NB 15 AIR</h3><p>256GB / 轻量亮相系统</p></div><strong>¥6,999</strong><i data-lucide="circle"></i></article>
+        <article class="version-row reveal"><span>02</span><div><h3>SW-NB 15 PRO</h3><p>1TB / 高压现场系统</p></div><strong>¥9,999</strong><i data-lucide="circle-dot"></i></article>
+        <article class="version-row is-featured reveal"><span>03</span><div><h3>SW-NB 15 PRO MAX</h3><p>2TB / 完整场面接管系统</p></div><strong>¥12,999</strong><i data-lucide="badge-check"></i></article>
+      </div>
+    </section>
 
-        <!-- Storage -->
-        <section id="storage" style="padding: 0;">
-            <div class="blackhole-container">
-                <div class="blackhole"></div>
-                <div class="blackhole-text reveal">
-                    <h2>2TB MAX</h2>
-                    <div class="massive-text" style="margin-top: -10px; font-size: clamp(1.5rem, 5vw, 3.5rem);">吞噬宇宙的记忆黑洞</div>
-                    <p class="desc" style="max-width: 700px; margin: 30px auto 0 auto; color: #ccc; padding: 0 20px;">空间大到足以扭曲时间。<strong style="color: #ff007f;">1.9TB 存放无底线的骚话与段子</strong>，极度压缩的 <strong style="color: #00f2fe;">0.1TB 处理正经事</strong>。读取速度 100GB/s，你甚至还未开口，他已准备好接梗。</p>
-                </div>
-            </div>
-        </section>
+    <section class="faq-section">
+      <header class="faq-heading reveal"><p class="eyebrow">Final briefing</p><h2>最后，<br>把问题讲清楚。</h2></header>
+      <div class="faq-list reveal">
+        <details><summary>为什么峰值续航只有 3 小时？<i data-lucide="plus"></i></summary><p>因为能量优先供给瞬时爆发、现场处理与高亮时刻。它是一台峰值机器，不是低功耗设备。</p></details>
+        <details><summary>2TB 到底归档什么？<i data-lucide="plus"></i></summary><p>照片、语音、聊天、截图、回放，以及那些不想删也不该删的片段。</p></details>
+        <details><summary>什么时候正式发售？<i data-lucide="plus"></i></summary><p>当前为数字发布会展示版本，正式发售时间仍待进一步通知。</p></details>
+      </div>
+    </section>
+  </main>
 
-        <!-- Chip / Performance -->
-        <section id="chip" class="launch-section chip-section">
-            <div class="launch-copy reveal">
-                <p class="section-kicker">CORE ARCHITECTURE</p>
-                <h2 class="launch-title">神经元级场面控制引擎</h2>
-                <p class="launch-desc">把反应链路、气氛调度和接话速度，统一交给一枚过于超前的性能核心。</p>
-            </div>
-
-            <div class="chip-stage reveal">
-                <div class="chip-visual">
-                    <div class="chip-core">
-                        <span>SW-Core X</span>
-                    </div>
-                    <div class="chip-line chip-line-h"></div>
-                    <div class="chip-line chip-line-v"></div>
-                    <div class="chip-node n1"></div>
-                    <div class="chip-node n2"></div>
-                    <div class="chip-node n3"></div>
-                    <div class="chip-node n4"></div>
-                </div>
-                <div class="chip-stats">
-                    <div class="mega-stat">
-                        <span>响应链路</span>
-                        <strong>0.01s</strong>
-                    </div>
-                    <div class="spec-pills">
-                        <article>神经元级调度</article>
-                        <article>多线程接梗</article>
-                        <article>全时场面控制</article>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Scenes -->
-        <section id="scenes" class="launch-section scenes-section">
-            <div class="launch-copy reveal">
-                <p class="section-kicker">SIGNATURE SCENES</p>
-                <h2 class="launch-title">典型场景，逐一接管</h2>
-                <p class="launch-desc">不解释原理，直接看它在不同场合里怎么接手整场氛围。</p>
-            </div>
-
-            <div class="scene-grid">
-                <article class="scene-card reveal">
-                    <div class="scene-visual scene-night"></div>
-                    <p class="scene-label">Night Mode</p>
-                    <h3>夜场模式</h3>
-                    <p>灯光再乱，重心依旧稳稳落在主角身上。</p>
-                </article>
-                <article class="scene-card reveal">
-                    <div class="scene-visual scene-group"></div>
-                    <p class="scene-label">Group Capture</p>
-                    <h3>合影模式</h3>
-                    <p>人再多，站位再乱，也能自动把存在感拉满。</p>
-                </article>
-                <article class="scene-card reveal">
-                    <div class="scene-visual scene-chat"></div>
-                    <p class="scene-label">Instant Banter</p>
-                    <h3>群聊接梗模式</h3>
-                    <p>消息还没刷完，下一句已经在路上。</p>
-                </article>
-            </div>
-        </section>
-
-        <!-- Versions -->
-        <section id="versions" class="launch-section versions-section">
-            <div class="launch-copy reveal">
-                <p class="section-kicker">VERSIONS & PRICING</p>
-                <h2 class="launch-title">三个版本，一眼选定</h2>
-                <p class="launch-desc">从轻量亮相到完整版压轴，配置拉开，气场同步升级。</p>
-            </div>
-
-            <div class="versions-grid">
-                <article class="version-card reveal">
-                    <p class="version-name">SW-NB 15 Air</p>
-                    <p class="version-storage">256GB</p>
-                    <p class="version-role">适合轻量出场，主打一个清爽利落。</p>
-                    <p class="version-price">¥6,999</p>
-                    <a href="#faq" class="version-cta">查看说明</a>
-                </article>
-
-                <article class="version-card reveal">
-                    <p class="version-name">SW-NB 15 Pro</p>
-                    <p class="version-storage">1TB</p>
-                    <p class="version-role">适合常规高压环境，稳定接管大部分场面。</p>
-                    <p class="version-price">¥9,999</p>
-                    <a href="#faq" class="version-cta">查看说明</a>
-                </article>
-
-                <article class="version-card featured reveal">
-                    <div class="featured-tag">推荐版本</div>
-                    <p class="version-name">SW-NB 15 Pro Max</p>
-                    <p class="version-storage">2TB</p>
-                    <p class="version-role">完整版配置，适合把亮相、记录和火力全部拉满。</p>
-                    <p class="version-price">¥12,999</p>
-                    <a href="#faq" class="version-cta featured-cta">查看完整说明</a>
-                </article>
-            </div>
-        </section>
-
-        <!-- FAQ -->
-        <section id="faq" class="launch-section faq-section">
-            <div class="launch-copy reveal">
-                <p class="section-kicker">COMMON QUESTIONS</p>
-                <h2 class="launch-title">最后，再把问题讲清楚</h2>
-                <p class="launch-desc">参数已经看完，剩下的，都是最常被追问的部分。</p>
-            </div>
-
-            <div class="faq-list reveal">
-                <details>
-                    <summary>为什么续航只有 3 小时？</summary>
-                    <p>因为能量全部优先给到了瞬时爆发、场面压制和高亮时刻。它不是慢热路线，而是高峰值路线。</p>
-                </details>
-                <details>
-                    <summary>2TB 到底都装什么？</summary>
-                    <p>照片、聊天记录、语音、截图、回放和那些不想删也不该删的片段，都会被完整归档。</p>
-                </details>
-                <details>
-                    <summary>是否支持长期稳定使用？</summary>
-                    <p>支持，但建议在高强度场景结束后及时补能。毕竟完整版体验，从来都不是低功耗产物。</p>
-                </details>
-                <details>
-                    <summary>为什么现在只能展示，暂时不能下单？</summary>
-                    <p>因为当前页面属于发布会展示版本，版本、价格与配置已经公开，正式发售仍待进一步通知。</p>
-                </details>
-            </div>
-
-            <div class="faq-actions reveal">
-                <a href="#versions" class="faq-btn primary-btn">查看完整版本</a>
-                <a href="#hero" class="faq-btn ghost-btn">返回顶部</a>
-            </div>
-        </section>
-
-        <footer class="site-footer">
-            <p>SW-NB INC. 2026</p>
-            <p>发布会下半场到此结束。其余传说，请以实机体验为准。</p>
-        </footer>
-    </div>
-
-    <!-- 逻辑脚本 -->
-    <script src="script.js?v=20260321b"></script>
+  <footer class="launch-footer"><span>SW-NB INC. / 2026</span><a href="#hero">BACK TO SIGNAL <i data-lucide="arrow-up"></i></a></footer>
 </body>
 </html>
-
-

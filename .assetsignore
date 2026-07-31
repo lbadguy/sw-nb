@@ -10,5 +10,11 @@ supabase/
 supabase/**
 tests/
 tests/**
+scripts/
+scripts/**
+node_modules/
+node_modules/**
+package.json
+package-lock.json
 wrangler.jsonc
 worker.js

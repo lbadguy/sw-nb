@@ -1,136 +1,121 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我要娶一个旅行车 的主页 - 懂车帝</title>
-  <meta name="description" content="我要娶一个旅行车在懂车帝发布的所有精彩帖子与测评文章。重点展示丰富的旅行车自驾游攻略、车型深度改装与试驾对比。">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="我要娶一个旅行车的懂车帝公开动态档案，每日同步。">
+  <meta name="theme-color" content="#090a0a">
+  <title>Road Signal / 懂车帝每日动态</title>
+  <link rel="preload" href="../assets/road-story.jpg" as="image">
+  <link rel="stylesheet" href="../design-system.css">
   <link rel="stylesheet" href="style.css">
+  <script src="../vendor/lucide.min.js" defer></script>
+  <script src="../shared-browser-utils.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-
-  <!-- Top Navigation Header -->
-  <header class="top-header">
-    <div class="header-left">
-      <a href="#" class="brand-logo">
-        <span class="brand-icon">帝</span>
-        <span>懂车帝</span>
-      </a>
-    </div>
-    <div class="header-center">
-      <div class="search-box">
-        <input type="text" class="search-input" placeholder="搜车、看车、选车、买车...">
-        <button class="search-btn">搜索</button>
-      </div>
-    </div>
-    <div class="header-right">
-      <span class="nav-link">业务合作</span>
-      <span class="nav-link">下载App</span>
-      <button class="btn-publish">+ 发布作品</button>
-      <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=100&auto=format&fit=crop&q=80" style="width:32px;height:32px;border-radius:50%;cursor:pointer;" alt="个人头像">
-    </div>
+  <header class="signal-header">
+    <a class="signal-brand" href="../" aria-label="返回 SW-NB 首页">
+      <span>帝</span><b>ROAD SIGNAL</b>
+    </a>
+    <div class="sync-beacon" id="headerSyncState"><span></span>CONNECTING</div>
+    <a id="topSourceLink" class="header-source" href="https://www.dongchedi.com/user/485359118462679" target="_blank" rel="noopener noreferrer">
+      <span>源主页</span><i data-lucide="external-link"></i>
+    </a>
   </header>
 
-  <!-- Left Sidebar Navigation -->
-  <aside class="sidebar">
-    <ul class="sidebar-menu">
-      <li class="sidebar-item">
-        <span class="sidebar-icon">🏠</span>
-        <span>首页</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">🚘</span>
-        <span>选车</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">🔄</span>
-        <span>二手车</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">🎬</span>
-        <span>视频</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">📰</span>
-        <span>资讯</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">⭕</span>
-        <span>车友圈</span>
-      </li>
-      <li class="sidebar-item">
-        <span class="sidebar-icon">🏆</span>
-        <span>排行榜</span>
-      </li>
-      <li class="sidebar-item active">
-        <span class="sidebar-icon">👤</span>
-        <span>我的</span>
-      </li>
-    </ul>
-  </aside>
-
-  <!-- Main Content Wrapper -->
-  <main class="main-wrapper">
-    <!-- User Profile Header Card -->
-    <section class="profile-card">
-      <div class="profile-info-left">
-        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&auto=format&fit=crop&q=80" class="avatar-large" alt="用户头像">
-        <div class="user-meta">
-          <div class="user-name">
-            <span>我要娶一个旅行车</span>
-            <span class="user-badge">懂车帝创作者</span>
+  <main>
+    <section class="profile-stage" aria-labelledby="profileName">
+      <div class="profile-media" data-profile-parallax>
+        <img id="profileCover" src="../assets/road-story.jpg" alt="山地公路上的旅行车">
+      </div>
+      <div class="profile-shade" aria-hidden="true"></div>
+      <div class="profile-layout">
+        <div class="profile-kicker"><span>PUBLIC ARCHIVE</span><span>DAILY / 20:17 UTC</span></div>
+        <div class="profile-copy">
+          <p class="eyebrow">Dongchedi field transmission</p>
+          <h1 id="profileName"><span>我要娶一个</span><span class="outline-word">旅行车</span></h1>
+          <div class="profile-owner">
+            <img id="profileAvatar" alt="我要娶一个旅行车的头像" width="72" height="72">
+            <div>
+              <p id="profileBio">正在读取公开资料与每日快照。</p>
+              <div id="profileMedals" class="profile-medals"></div>
+            </div>
           </div>
-          <div class="user-bio">这个人很懒，什么都没写~</div>
         </div>
-      </div>
-      <div class="profile-stats-right">
-        <div class="stat-item">
-          <span class="stat-num">22</span>
-          <span class="stat-label">粉丝</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">5</span>
-          <span class="stat-label">关注</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">389</span>
-          <span class="stat-label">获赞</span>
-        </div>
-        <button id="followBtn" class="btn-follow" onclick="toggleFollow()">
-          <span>✓</span> 已关注
-        </button>
+        <dl class="profile-telemetry" aria-label="账号数据">
+          <div><dt>FOLLOWERS</dt><dd id="followersCount">--</dd><span>粉丝</span></div>
+          <div><dt>LIKES</dt><dd id="likesCount">--</dd><span>获赞</span></div>
+          <div><dt>FOLLOWING</dt><dd id="followingCount">--</dd><span>关注</span></div>
+          <div><dt>ARCHIVED</dt><dd id="postCount">--</dd><span>动态</span></div>
+        </dl>
+        <a class="stage-scroll" href="#archive"><i data-lucide="arrow-down"></i><span>浏览每日档案</span></a>
       </div>
     </section>
 
-    <!-- Tabs Navigation Card -->
-    <section class="tabs-card">
-      <ul class="tabs-list">
-        <li class="tab-item active" data-tab="all" onclick="switchTab('all')">全部作品 (5)</li>
-        <li class="tab-item" data-tab="liked" onclick="switchTab('liked')">喜欢 (2)</li>
-      </ul>
-      <div class="filter-hint">💡 点击帖子任意区域可沉浸查看全文及车友评论</div>
+    <div class="signal-ticker" aria-hidden="true">
+      <div>LIVE SNAPSHOT <i data-lucide="radio-tower"></i> PUBLIC POSTS <i data-lucide="asterisk"></i> ROAD CULTURE <i data-lucide="route"></i> LIVE SNAPSHOT <i data-lucide="radio-tower"></i> PUBLIC POSTS <i data-lucide="asterisk"></i> ROAD CULTURE <i data-lucide="route"></i></div>
+    </div>
+
+    <section id="archive" class="archive-section">
+      <div class="archive-intro reveal">
+        <p class="archive-index">02 / DAILY ARCHIVE</p>
+        <h2>道路正在发生。<br><span>档案保持清醒。</span></h2>
+        <p id="archiveSummary">从 Worker 的每日 KV 快照读取公开动态。</p>
+      </div>
+
+      <div class="archive-console reveal">
+        <div class="sync-readout">
+          <span id="syncStatus"><i data-lucide="loader-circle"></i> 正在连接快照</span>
+          <time id="syncTime"></time>
+        </div>
+        <div class="archive-controls">
+          <label class="search-control" for="postSearch">
+            <i data-lucide="search"></i>
+            <input id="postSearch" type="search" autocomplete="off" placeholder="搜索标题、正文或车友圈">
+            <button id="clearSearchBtn" type="button" hidden aria-label="清除搜索" title="清除搜索"><i data-lucide="x"></i></button>
+          </label>
+          <div class="sort-control" aria-label="动态排序">
+            <button type="button" class="is-active" data-sort="latest">最新</button>
+            <button type="button" data-sort="popular">热门</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="feedStatus" class="feed-status" aria-live="polite">
+        <div class="feed-loading"><span></span><span></span><span></span></div>
+      </div>
+      <section id="feedList" class="feed-grid" aria-label="公开动态列表"></section>
+      <div id="loadMoreWrap" class="load-more-wrap" hidden>
+        <button id="loadMoreBtn" class="load-more" type="button"><span>继续读取</span><i data-lucide="plus"></i></button>
+      </div>
     </section>
 
-    <!-- Posts Feed Container -->
-    <section id="feedList" class="feed-container">
-      <!-- Dynamically rendered by app.js -->
+    <section class="source-band">
+      <div class="source-band-copy reveal">
+        <p>485359118462679 / DONGCHEDI</p>
+        <h2>FROM SOURCE.<br><span>WITHOUT FICTION.</span></h2>
+      </div>
+      <a id="bottomSourceLink" class="source-band-link reveal" href="https://www.dongchedi.com/user/485359118462679" target="_blank" rel="noopener noreferrer">
+        <span>在懂车帝查看原始主页</span><i data-lucide="arrow-up-right"></i>
+      </a>
     </section>
   </main>
 
-  <!-- Interactive Article Modal (Pop-up Detail View) -->
-  <div id="articleModal" class="modal-overlay" onclick="closeArticleModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <span style="font-weight: 700; font-size: 16px; color: #1f2329;">帖子详情</span>
-        <button class="modal-close-btn" onclick="closeArticleModal()">✕</button>
-      </div>
-      <div id="modalBodyContent" class="modal-body">
-        <!-- Rendered dynamically -->
-      </div>
-    </div>
-  </div>
+  <footer class="signal-footer">
+    <span>SW-NB / ROAD SIGNAL</span>
+    <span>PUBLIC DATA / DAILY CACHE</span>
+    <a href="../">BACK TO FIELD NOTES</a>
+  </footer>
 
-  <script src="../shared-browser-utils.js"></script>
-  <script src="app.js"></script>
+  <dialog id="articleModal" class="post-dialog" aria-labelledby="dialogTitle">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <div><time id="dialogDate"></time><h2 id="dialogTitle">动态详情</h2></div>
+        <form method="dialog"><button type="submit" class="dialog-close" aria-label="关闭动态详情" title="关闭"><i data-lucide="x"></i></button></form>
+      </header>
+      <div id="modalBodyContent" class="dialog-body"></div>
+    </div>
+  </dialog>
 </body>
 </html>
