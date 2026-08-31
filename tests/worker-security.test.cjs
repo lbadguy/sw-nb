@@ -26,6 +26,7 @@ test('wrangler restores the production KV and daily schedule', () => {
   assert.match(source, /a958bcd6382c4f469f077c40d0997d5b/);
   assert.match(source, /"DONGCHEDI_USER_ID"\s*:\s*"485359118462679"/);
   assert.match(source, /"17 20 \* \* \*"/);
+  assert.match(source, /"\*\/10 \* \* \* \*"/);
   assert.doesNotMatch(source, /REPLACE_WITH_KV/);
 });
 
@@ -92,4 +93,30 @@ test('dongchedi endpoint serves the cached snapshot with validators', async () =
   assert.equal(body.cache.status, 'fresh');
   assert.match(response.headers.get('ETag'), /^W\/"dcd-/);
   assert.match(response.headers.get('Cache-Control'), /stale-while-revalidate=86400/);
+});
+
+test('scheduled keepalive pings supabase without touching dongchedi upstream', async () => {
+  const worker = await loadWorkerModule();
+  const requestedUrls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requestedUrls.push(url);
+    if (url.includes('supabase.co')) {
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    throw new Error('unexpected upstream request: ' + url);
+  };
+  try {
+    const controller = { cron: '*/10 * * * *', scheduledTime: Date.now() };
+    const env = { DONGCHEDI_CACHE: { get: async () => null, put: async () => {} } };
+    const waitUntil = [];
+    await worker.default.scheduled(controller, env, { waitUntil: (p) => waitUntil.push(p) });
+    await Promise.allSettled(waitUntil);
+    assert.equal(requestedUrls.length, 1);
+    assert.match(requestedUrls[0], /rest\/v1\/posts\?select=id&limit=1/);
+    assert.match(requestedUrls[0], /szbgotjjhurfxhyktbus\.supabase\.co/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

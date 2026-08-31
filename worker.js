@@ -5,6 +5,10 @@ const DONGCHEDI_STALE_AFTER_MS = 36 * 60 * 60 * 1_000;
 const DONGCHEDI_MAX_PAGES = 20;
 const DONGCHEDI_MAX_POSTS = 2_000;
 
+const SUPABASE_URL = 'https://szbgotjjhurfxhyktbus.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_swGyzcP9s0tTZwf0vgF5cw_5h5VV2ww';
+const SUPABASE_KEEPALIVE_TIMEOUT_MS = 10_000;
+
 const SECURITY_HEADERS = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -279,6 +283,19 @@ async function readDongchediCache(env) {
   }
 }
 
+export async function pingSupabase() {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=id&limit=1`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Accept: 'application/json',
+    },
+    signal: AbortSignal.timeout(SUPABASE_KEEPALIVE_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`supabase keepalive returned ${response.status}`);
+  return { status: 'ok', upstreamStatus: response.status };
+}
+
 export async function refreshDongchediCache(env) {
   const userId = textValue(env.DONGCHEDI_USER_ID, 80) || '485359118462679';
   const snapshot = await fetchDongchediSnapshot(userId);
@@ -378,24 +395,47 @@ export default {
 
   async scheduled(controller, env, ctx) {
     const startedAt = Date.now();
-    const job = refreshDongchediCache(env).then((snapshot) => {
+    const isDaily = controller.cron === '17 20 * * *';
+
+    if (isDaily) {
+      const job = refreshDongchediCache(env).then((snapshot) => {
+        console.log(JSON.stringify({
+          message: 'dongchedi daily refresh completed',
+          cron: controller.cron,
+          scheduledTime: controller.scheduledTime,
+          durationMs: Date.now() - startedAt,
+          postCount: snapshot.posts.length,
+        }));
+      }).catch((error) => {
+        console.error(JSON.stringify({
+          message: 'dongchedi daily refresh failed',
+          cron: controller.cron,
+          scheduledTime: controller.scheduledTime,
+          durationMs: Date.now() - startedAt,
+          error: error instanceof Error ? error.message : String(error),
+        }));
+        throw error;
+      });
+      ctx.waitUntil(job);
+    }
+
+    const keepalive = pingSupabase().then((result) => {
       console.log(JSON.stringify({
-        message: 'dongchedi daily refresh completed',
+        message: 'supabase keepalive completed',
         cron: controller.cron,
         scheduledTime: controller.scheduledTime,
         durationMs: Date.now() - startedAt,
-        postCount: snapshot.posts.length,
+        upstreamStatus: result.upstreamStatus,
       }));
     }).catch((error) => {
       console.error(JSON.stringify({
-        message: 'dongchedi daily refresh failed',
+        message: 'supabase keepalive failed',
         cron: controller.cron,
         scheduledTime: controller.scheduledTime,
         durationMs: Date.now() - startedAt,
         error: error instanceof Error ? error.message : String(error),
       }));
-      throw error;
     });
-    ctx.waitUntil(job);
+    ctx.waitUntil(keepalive);
   },
 };
